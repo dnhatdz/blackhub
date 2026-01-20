@@ -307,10 +307,16 @@ local function refreshPickaxeList()
 		end)
 	end
 
-	pickaxeFrame:TweenSize(
-		UDim2.new(1,0,0,#PICKAXE_LIST*32),
-		"Out","Quad",0.25,true
-	)
+	local itemHeight = 32
+    local maxHeight = 120
+    local totalHeight = #PICKAXE_LIST * itemHeight
+
+    pickaxeFrame.CanvasSize = UDim2.new(0,0,0,totalHeight)
+    pickaxeFrame:TweenSize(
+       UDim2.new(1,0,0, math.min(totalHeight, maxHeight)),
+       "Out","Quad",0.25,true
+    )
+
 end
 
 -- ===== NÚT CHOOSE PICKAXE =====
