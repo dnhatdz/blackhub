@@ -272,8 +272,11 @@ btnAutoMine.MouseButton1Click:Connect(function()
 end)
 
 -- ===== PICKAXE LIST FRAME =====
-local pickaxeFrame = Instance.new("Frame", mineFrame)
+local pickaxeFrame = Instance.new("ScrollingFrame", mineFrame)
 pickaxeFrame.Size = UDim2.new(1,0,0,0)
+pickaxeFrame.CanvasSize = UDim2.new(0,0,0,0)
+pickaxeFrame.ScrollBarImageTransparency = 0
+pickaxeFrame.ScrollBarThickness = 4
 pickaxeFrame.BackgroundTransparency = 1
 pickaxeFrame.ClipsDescendants = true
 
