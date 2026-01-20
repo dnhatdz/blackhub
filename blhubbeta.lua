@@ -135,7 +135,7 @@ local function runMode()
 
 	-- V1
 	if currentMode == 1 then
-		local A = Vector3.new(722,29,-353)
+		local A = Vector3.new(720,4,-350)
 		local B = Vector3.new(632,4,-350)
 		hrp.CFrame = CFrame.new(A)
 		activeTween = TweenService:Create(
