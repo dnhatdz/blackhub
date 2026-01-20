@@ -33,7 +33,7 @@ title.Text = "BRAINROT HUB"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 13
 title.TextColor3 = Color3.new(1,1,1)
-title.TextXAlignment = Left
+title.TextXAlignment = Enum.TextXAlignment.Left
 
 -- ====== AUTO TWEEN BUTTON ======
 local btnTween = Instance.new("TextButton", frame)
