@@ -32,7 +32,7 @@ Instance.new("UICorner", frame).CornerRadius = UDim.new(0,10)
 -- ===== LIST LAYOUT =====
 local list = Instance.new("UIListLayout", frame)
 list.Padding = UDim.new(0,6)
-list.HorizontalAlignment = Center
+list.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 local function autoSize()
 	task.wait()
