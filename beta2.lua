@@ -14,7 +14,6 @@ local function getHRP()
 	return char:WaitForChild("HumanoidRootPart")
 end
 local hrp = getHRP()
-
 player.CharacterAdded:Connect(function()
 	hrp = getHRP()
 end)
@@ -35,12 +34,7 @@ local autoEquip = false
 local equipMode = true
 local selectedPickaxe = nil
 
--- ================= UI ROOT =================
-local gui = Instance.new("ScreenGui", player.PlayerGui)
-gui.Name = "BlackHubV3"
-gui.ResetOnSpawn = false
-
--- Blur
+-- ================= BLUR =================
 local blur = Instance.new("BlurEffect")
 blur.Size = 0
 blur.Parent = Lighting
@@ -48,10 +42,15 @@ blur.Parent = Lighting
 local function setBlur(on)
 	TweenService:Create(
 		blur,
-		TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Size = on and 16 or 0}
+		TweenInfo.new(0.25),
+		{Size = on and 12 or 0}
 	):Play()
 end
+
+-- ================= UI ROOT =================
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "BlackHubV3"
+gui.ResetOnSpawn = false
 
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0, 520, 0, 320)
@@ -63,20 +62,18 @@ Instance.new("UICorner", main).CornerRadius = UDim.new(0,10)
 
 -- Shadow
 local shadow = Instance.new("ImageLabel", main)
-shadow.Size = UDim2.new(1, 30, 1, 30)
-shadow.Position = UDim2.new(0, -15, 0, -15)
+shadow.Size = UDim2.new(1, 40, 1, 40)
+shadow.Position = UDim2.new(0, -20, 0, -20)
 shadow.Image = "rbxassetid://1316045217"
-shadow.ImageTransparency = 0.5
+shadow.ImageTransparency = 0.6
 shadow.ScaleType = Enum.ScaleType.Slice
 shadow.SliceCenter = Rect.new(10,10,118,118)
 shadow.BackgroundTransparency = 1
 shadow.ZIndex = -1
 
-setBlur(true)
-
 -- ================= TITLE =================
 local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1, -20, 0, 30)
+title.Size = UDim2.new(1, -60, 0, 30)
 title.Position = UDim2.new(0, 10, 0, 5)
 title.Text = "BLACK HUB"
 title.TextColor3 = Color3.new(1,1,1)
@@ -85,24 +82,17 @@ title.TextSize = 16
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.BackgroundTransparency = 1
 
--- Toggle button
+-- ================= TOGGLE BUTTON =================
 local toggle = Instance.new("TextButton", main)
-toggle.Size = UDim2.new(0,22,0,22)
-toggle.Position = UDim2.new(1,-28,0,8)
-toggle.Text = "—"
+toggle.Size = UDim2.new(0, 30, 0, 30)
+toggle.Position = UDim2.new(1, -40, 0, 5)
+toggle.Text = "-"
 toggle.Font = Enum.Font.GothamBold
-toggle.TextSize = 16
-toggle.BackgroundColor3 = Color3.fromRGB(40,40,40)
+toggle.TextSize = 18
 toggle.TextColor3 = Color3.new(1,1,1)
+toggle.BackgroundColor3 = Color3.fromRGB(40,40,40)
 toggle.BorderSizePixel = 0
 Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
-
-local opened = true
-toggle.MouseButton1Click:Connect(function()
-	opened = not opened
-	main.Visible = opened
-	setBlur(opened)
-end)
 
 -- ================= LEFT MENU =================
 local left = Instance.new("Frame", main)
@@ -149,87 +139,91 @@ local function clearRight()
 end
 
 local function slideDown(frame, height)
-	frame.Visible = true
 	frame.ClipsDescendants = true
 	frame.Size = UDim2.new(1,-10,0,0)
-	TweenService:Create(
-		frame,
-		TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-		{Size = UDim2.new(1,-10,0,height)}
-	):Play()
+	TweenService:Create(frame,TweenInfo.new(0.25,Enum.EasingStyle.Quart),{
+		Size = UDim2.new(1,-10,0,height)
+	}):Play()
 end
 
 local function slideUp(frame)
-	local t = TweenService:Create(
-		frame,
-		TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
-		{Size = UDim2.new(1,-10,0,0)}
-	)
-	t:Play()
-	t.Completed:Once(function()
-		frame:Destroy()
+	TweenService:Create(frame,TweenInfo.new(0.25,Enum.EasingStyle.Quart),{
+		Size = UDim2.new(1,-10,0,0)
+	}):Play()
+	task.delay(0.3,function()
+		if frame then frame:Destroy() end
 	end)
 end
 
--- ================= LEFT MENU BUTTONS =================
-local btnTeleport = makeBtn(left, "Teleport")
-local btnFarm = makeBtn(left, "Farm")
+-- ================= LEFT BUTTONS =================
+local btnTeleport = makeBtn(left,"Teleport")
+local btnFarm = makeBtn(left,"Farm")
 
 -- ================= TELEPORT TAB =================
 local function buildTeleport()
 	clearRight()
 
-	local btnAutoFarm = makeBtn(right, "Auto Teleport Farm : OFF")
+	local btnAutoFarm = makeBtn(right,"Auto Teleport Farm : OFF")
 	btnAutoFarm.MouseButton1Click:Connect(function()
 		autoTeleFarm = not autoTeleFarm
-		btnAutoFarm.Text = "Auto Teleport Farm : " .. (autoTeleFarm and "ON" or "OFF")
+		btnAutoFarm.Text = "Auto Teleport Farm : "..(autoTeleFarm and "ON" or "OFF")
 
 		if autoTeleFarm then
 			savedPos = hrp.Position
 			local posB = Vector3.new(700,20,-350)
-			hrp.CFrame = CFrame.new(posB)
 
 			task.spawn(function()
 				while autoTeleFarm do
+					hrp.CFrame = CFrame.new(posB)
 					task.wait(1)
 					hrp.CFrame = CFrame.new(savedPos)
 					task.wait(1)
-					hrp.CFrame = CFrame.new(posB)
 				end
 			end)
 		end
 	end)
 
-	local btnTelePlayer = makeBtn(right, "Teleport Player : OFF")
-	local playerListFrame
+	local btnTelePlayer = makeBtn(right,"Teleport Player : OFF")
+	local listFrame
 
 	btnTelePlayer.MouseButton1Click:Connect(function()
 		autoTelePlayer = not autoTelePlayer
-		btnTelePlayer.Text = "Teleport Player : " .. (autoTelePlayer and "ON" or "OFF")
+		btnTelePlayer.Text = "Teleport Player : "..(autoTelePlayer and "ON" or "OFF")
 
 		if autoTelePlayer then
-			playerListFrame = Instance.new("Frame", right)
-			playerListFrame.BackgroundTransparency = 1
-			local ul = Instance.new("UIListLayout", playerListFrame)
+			listFrame = Instance.new("Frame", right)
+			listFrame.BackgroundTransparency = 1
+			slideDown(listFrame,150)
+
+			local scroll = Instance.new("ScrollingFrame", listFrame)
+			scroll.Size = UDim2.new(1,0,1,0)
+			scroll.CanvasSize = UDim2.new(0,0,0,0)
+			scroll.ScrollBarThickness = 4
+			scroll.BackgroundTransparency = 1
+
+			local ul = Instance.new("UIListLayout", scroll)
 			ul.Padding = UDim.new(0,4)
 
-			slideDown(playerListFrame, 140)
+			ul:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+				scroll.CanvasSize = UDim2.new(0,0,0,ul.AbsoluteContentSize.Y+6)
+			end)
 
 			for _,plr in ipairs(Players:GetPlayers()) do
 				if plr ~= player then
-					local pBtn = makeBtn(playerListFrame, plr.Name, 26)
-					pBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
-					pBtn.TextColor3 = Color3.fromRGB(0,0,0)
-
-					pBtn.MouseButton1Click:Connect(function()
+					local b = makeBtn(scroll,plr.Name,26)
+					b.MouseButton1Click:Connect(function()
 						followPlayer = plr
-						pBtn.BackgroundColor3 = Color3.fromRGB(0,120,255)
-						pBtn.TextColor3 = Color3.new(1,1,1)
+						for _,v in ipairs(scroll:GetChildren()) do
+							if v:IsA("TextButton") then
+								v.BackgroundColor3 = Color3.fromRGB(35,35,35)
+							end
+						end
+						b.BackgroundColor3 = Color3.fromRGB(0,120,255)
 					end)
 				end
 			end
 		else
-			if playerListFrame then slideUp(playerListFrame) end
+			if listFrame then slideUp(listFrame) end
 		end
 	end)
 
@@ -249,10 +243,10 @@ end
 local function buildFarm()
 	clearRight()
 
-	local btnFast = makeBtn(right, "Fast Mine : OFF")
+	local btnFast = makeBtn(right,"Fast Mine : OFF")
 	btnFast.MouseButton1Click:Connect(function()
 		fastMine = not fastMine
-		btnFast.Text = "Fast Mine : " .. (fastMine and "ON" or "OFF")
+		btnFast.Text = "Fast Mine : "..(fastMine and "ON" or "OFF")
 	end)
 
 	task.spawn(function()
@@ -264,10 +258,10 @@ local function buildFarm()
 		end
 	end)
 
-	local btnAutoMine = makeBtn(right, "Auto Mine : OFF")
+	local btnAutoMine = makeBtn(right,"Auto Mine : OFF")
 	btnAutoMine.MouseButton1Click:Connect(function()
 		autoMine = not autoMine
-		btnAutoMine.Text = "Auto Mine : " .. (autoMine and "ON" or "OFF")
+		btnAutoMine.Text = "Auto Mine : "..(autoMine and "ON" or "OFF")
 	end)
 
 	task.spawn(function()
@@ -281,19 +275,27 @@ local function buildFarm()
 		end
 	end)
 
-	local btnEquip = makeBtn(right, "Auto Equip")
-	local subFrame
+	local btnEquip = makeBtn(right,"Auto Equip")
+	local sub
 
 	btnEquip.MouseButton1Click:Connect(function()
 		autoEquip = not autoEquip
-
 		if autoEquip then
-			subFrame = Instance.new("Frame", right)
-			subFrame.BackgroundTransparency = 1
-			local ul = Instance.new("UIListLayout", subFrame)
+			sub = Instance.new("Frame", right)
+			sub.BackgroundTransparency = 1
+			slideDown(sub,180)
+
+			local scroll = Instance.new("ScrollingFrame", sub)
+			scroll.Size = UDim2.new(1,0,1,0)
+			scroll.ScrollBarThickness = 4
+			scroll.BackgroundTransparency = 1
+
+			local ul = Instance.new("UIListLayout", scroll)
 			ul.Padding = UDim.new(0,4)
 
-			slideDown(subFrame, 160)
+			ul:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+				scroll.CanvasSize = UDim2.new(0,0,0,ul.AbsoluteContentSize.Y+6)
+			end)
 
 			local pickaxes = {
 				"Iron Pickaxe","Golden Pickaxe","Diamond Pickaxe",
@@ -302,26 +304,25 @@ local function buildFarm()
 			}
 
 			for _,name in ipairs(pickaxes) do
-				local p = makeBtn(subFrame, name, 26)
+				local p = makeBtn(scroll,name,26)
 				p.MouseButton1Click:Connect(function()
 					selectedPickaxe = name
+					for _,v in ipairs(scroll:GetChildren()) do
+						if v:IsA("TextButton") then
+							v.BackgroundColor3 = Color3.fromRGB(35,35,35)
+						end
+					end
 					p.BackgroundColor3 = Color3.fromRGB(0,120,255)
 				end)
 			end
-
-			local modeBtn = makeBtn(subFrame, "Mode : ON", 26)
-			modeBtn.MouseButton1Click:Connect(function()
-				equipMode = not equipMode
-				modeBtn.Text = "Mode : " .. (equipMode and "ON" or "OFF")
-			end)
 		else
-			if subFrame then slideUp(subFrame) end
+			if sub then slideUp(sub) end
 		end
 	end)
 
 	task.spawn(function()
 		while true do
-			if autoEquip and equipMode and selectedPickaxe then
+			if autoEquip and selectedPickaxe then
 				ReplicatedStorage.Remotes.PickaxeEquipRequest:FireServer(selectedPickaxe)
 			end
 			task.wait(2)
@@ -330,30 +331,23 @@ local function buildFarm()
 end
 
 -- ================= TAB SWITCH =================
-local function switchTab(builder)
-	TweenService:Create(
-		right,
-		TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{BackgroundTransparency = 1}
-	):Play()
-
-	task.wait(0.15)
-	clearRight()
-	builder()
-
-	TweenService:Create(
-		right,
-		TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{BackgroundTransparency = 0}
-	):Play()
-end
-
-btnTeleport.MouseButton1Click:Connect(function()
-	switchTab(buildTeleport)
-end)
-
-btnFarm.MouseButton1Click:Connect(function()
-	switchTab(buildFarm)
-end)
+btnTeleport.MouseButton1Click:Connect(buildTeleport)
+btnFarm.MouseButton1Click:Connect(buildFarm)
 
 buildTeleport()
+setBlur(true)
+
+-- ================= TOGGLE =================
+local opened = true
+local fullSize = main.Size
+
+toggle.MouseButton1Click:Connect(function()
+	opened = not opened
+	if opened then
+		TweenService:Create(main,TweenInfo.new(0.25),{Size = fullSize}):Play()
+		setBlur(true)
+	else
+		TweenService:Create(main,TweenInfo.new(0.25),{Size = UDim2.new(0,120,0,30)}):Play()
+		setBlur(false)
+	end
+end)
