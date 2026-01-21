@@ -33,6 +33,13 @@ local farmPos = Vector3.new(10, 5, -350)
 local savedPos
 local farmSwitch = false
 
+local autoPlace = {
+	["Rainbow Lucky Block"] = false,
+	["Secret Lucky Block"] = false,
+	["Radioactive Lucky Block"] = false,
+	["Magma Lucky Block"] = false
+}
+
 -- ================= COLORS =================
 local RED = Color3.fromRGB(170,0,0)
 local GREEN = Color3.fromRGB(0,170,0)
@@ -139,6 +146,7 @@ end
 -- ================= LEFT BUTTONS =================
 local btnTeleport = makeBtn(left,"Teleport")
 local btnFarm = makeBtn(left,"Farm")
+local btnAutoPlace = makeBtn(left,"Auto Place")
 
 -- ================= TELEPORT TAB =================
 local function buildTeleport()
@@ -331,10 +339,30 @@ task.spawn(function()
 		task.wait(0.2)
 	end
 end)
+-- ================= AUTO PLACE TAB =================
+local function buildAutoPlace()
+	clearRight()
+
+	local function makeToggle(name)
+		local btn = makeBtn(right,name)
+		setToggle(btn,autoPlace[name],name)
+
+		btn.MouseButton1Click:Connect(function()
+			autoPlace[name] = not autoPlace[name]
+			setToggle(btn,autoPlace[name],name)
+		end)
+	end
+
+	makeToggle("Rainbow Lucky Block")
+	makeToggle("Secret Lucky Block")
+	makeToggle("Radioactive Lucky Block")
+	makeToggle("Magma Lucky Block")
+end
 
 -- ================= TAB SWITCH =================
 btnTeleport.MouseButton1Click:Connect(buildTeleport)
 btnFarm.MouseButton1Click:Connect(buildFarm)
+btnAutoPlace.MouseButton1Click:Connect(buildAutoPlace)
 
 buildTeleport()
 setBlur(true)
@@ -374,5 +402,30 @@ task.spawn(function()
 		else
 			task.wait(0.2)
 		end
+	end
+end)
+-- ================= AUTO PLACE LOOP =================
+task.spawn(function()
+	while true do
+		for itemName,enabled in pairs(autoPlace) do
+			if enabled then
+				pcall(function()
+					local char = player.Character
+					local hrp = char and char:FindFirstChild("HumanoidRootPart")
+					local bp = player:FindFirstChild("Backpack")
+					if not (char and hrp and bp) then return end
+
+					local tool = bp:FindFirstChild(itemName)
+					if tool and tool:IsA("Tool") then
+						tool.Parent = char
+						task.wait(0.05)
+						local cf = hrp.CFrame * CFrame.new(0,0,-6)
+						ReplicatedStorage.Remotes.PlacingRequest:FireServer(cf)
+					end
+				end)
+				break
+			end
+		end
+		task.wait(0.3) -- delay đặt
 	end
 end)
