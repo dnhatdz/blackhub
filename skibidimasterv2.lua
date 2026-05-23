@@ -1,3 +1,15 @@
+local Title = Instance.new("TextLabel")
+Title.Name = "GUITitle"
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0.5, 0, 0, 12) -- Căn giữa và cách mép trên 12px
+Title.AnchorPoint = Vector2.new(0.5, 0)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Font = Enum.Font.GothamBold -- Font chữ hiện đại và đậm
+Title.Text = "Skibidi Master Tower Defense v2"
+Title.TextColor3 = Color3.fromRGB(255, 20, 147) -- Màu hồng đậm (Deep Pink)
+Title.TextSize = 22
+Title.ZIndex = 5 -- Đảm bảo chữ luôn nằm trên cùng
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
