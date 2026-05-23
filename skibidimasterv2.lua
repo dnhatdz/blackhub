@@ -336,7 +336,7 @@ end)
 -- ==========================================
 -- AUTO RETRY (Sau 7 phút = 420 giây)
 -- ==========================================
-task.delay(410, function()
+task.delay(1, function()
     local success = false
     for i = 1, 5 do
         success = pcall(function()
