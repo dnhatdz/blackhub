@@ -7,12 +7,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- File cấu hình
+-- File cấu hình (Đã cập nhật để tự động lưu trạng thái On/Off của Record và Play)
 local FILE_NAME = "Skibidi_Master.json"
 local macroData = {
     spawnCommands = {}, 
     autoUpgrade = false,
-    autoAbility = false
+    autoAbility = false,
+    isRecording = false, -- Thêm trạng thái lưu Record
+    isPlaying = false    -- Thêm trạng thái lưu Play
 }
 
 -- Hàm lưu/tải file cấu hình
@@ -223,11 +225,8 @@ local function createToggle(parent, text, defaultState, callback)
 end
 
 -- ==========================================
--- 3. LOGIC HOOK BẰNG HOOKMETAMETHOD (TỐI ƯU CHO DELTA)
+-- 3. LOGIC HOOK BẰNG HOOKMETAMETHOD
 -- ==========================================
-local isRecording = false
-local isPlaying = false
-
 local function cframeToTable(cf)
     return {cf:GetComponents()}
 end
@@ -235,12 +234,14 @@ end
 local function tableToCFrame(tbl)
     return CFrame.new(unpack(tbl))
 end
+
 local oldNamecall
 oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
     
-    if isRecording and method == "InvokeServer" and self.Name == "unit_spawn" then
+    -- Kiểm tra trực tiếp biến lưu trong macroData
+    if macroData.isRecording and method == "InvokeServer" and self.Name == "unit_spawn" then
         if args[1] and typeof(args[2]) == "CFrame" then
             table.insert(macroData.spawnCommands, {
                 unitId = args[1],
@@ -251,22 +252,28 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     end
     return oldNamecall(self, ...)
 end)
-createToggle(FarmContainer, "Ghi lại hành động (Record)", false, function(state)
-    isRecording = state
+
+-- Nút Record đã liên kết đồng bộ với hệ thống Auto Save file JSON
+createToggle(FarmContainer, "Ghi lại hành động (Record)", macroData.isRecording, function(state)
+    macroData.isRecording = state
     if state then
-        macroData.spawnCommands = {}
-        saveSettings()
+        macroData.spawnCommands = {} -- Xóa dữ liệu cũ nếu bật ghi mới
     end
-end)
-createToggle(FarmContainer, "Bắt đầu phát Macro (Play)", false, function(state)
-    isPlaying = state
     saveSettings()
 end)
+
+-- Nút Play đã liên kết đồng bộ với hệ thống Auto Save file JSON
+createToggle(FarmContainer, "Bắt đầu phát Macro (Play)", macroData.isPlaying, function(state)
+    macroData.isPlaying = state
+    saveSettings()
+end)
+
 task.spawn(function()
     local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
         task.wait(2)
-        if isPlaying and #macroData.spawnCommands > 0 and clientServer then
+        -- Sử dụng dữ liệu lưu sẵn từ bộ nhớ cấu hình
+        if macroData.isPlaying and #macroData.spawnCommands > 0 and clientServer then
             for _, command in ipairs(macroData.spawnCommands) do
                 pcall(function()
                     clientServer.unit_spawn:InvokeServer(command.unitId, tableToCFrame(command.cframe))
@@ -275,14 +282,17 @@ task.spawn(function()
         end
     end
 end)
+
 createToggle(AutoContainer, "Auto Nâng Cấp (Upgrade 1-8)", macroData.autoUpgrade, function(state)
     macroData.autoUpgrade = state
     saveSettings()
 end)
+
 createToggle(AutoContainer, "Auto Kỹ Năng (Ability 1-8)", macroData.autoAbility, function(state)
     macroData.autoAbility = state
     saveSettings()
 end)
+
 task.spawn(function()
     local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
@@ -316,13 +326,13 @@ task.delay(420, function()
         pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer) end)
     end
 end)
+
 -- ==========================================
 -- 5. NÚT BẬT/TẮT MENU (DÀNH CHO PC & MOBILE DELTA)
 -- ==========================================
 local UserInputService = game:GetService("UserInputService")
 local menuVisible = true
 
--- Hàm thực hiện hiệu ứng Ẩn/Hiện Menu mượt mà
 local function toggleMenu()
     menuVisible = not menuVisible
     local targetSize = menuVisible and UDim2.new(0, 550, 0, 350) or UDim2.new(0, 0, 0, 0)
@@ -334,42 +344,36 @@ local function toggleMenu()
     }):Play()
 end
 
--- Cách 1: Bấm phím Left Control (Ctrl Trái) trên PC để Ẩn/Hiện
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftControl then
         toggleMenu()
     end
 end)
 
--- Cách 2: Tạo nút bấm nổi màu hồng (Floating Button) trên màn hình cho Mobile
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "HubToggleButton"
 ToggleButton.Size = UDim2.new(0, 50, 0, 50)
-ToggleButton.Position = UDim2.new(0, 10, 0.5, -25) -- Vị trí mép trái màn hình
-ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- Màu hồng đậm
+ToggleButton.Position = UDim2.new(0, 10, 0.5, -25)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 ToggleButton.Text = "HUB"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.TextSize = 14
 ToggleButton.Parent = ScreenGui
 
--- Làm tròn nút bấm nổi thành hình tròn
 local ButtonCorner = Instance.new("UICorner")
 ButtonCorner.CornerRadius = UDim.new(0, 25)
 ButtonCorner.Parent = ToggleButton
 
--- Viền trắng cho nút nổi bật
 local ButtonStroke = Instance.new("UIStroke")
 ButtonStroke.Color = Color3.fromRGB(255, 255, 255)
 ButtonStroke.Thickness = 2
 ButtonStroke.Parent = ToggleButton
 
--- Click vào nút tròn sẽ Ẩn/Hiện menu
 ToggleButton.MouseButton1Click:Connect(function()
     toggleMenu()
 end)
 
--- Tính năng kéo thả nút bấm nổi trên màn hình Mobile (Drag Feature)
 local dragging, dragInput, dragStart, startPos
 ToggleButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
