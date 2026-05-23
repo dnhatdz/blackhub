@@ -318,39 +318,24 @@ end)
 -- ==========================================
 -- AUTO REJOIN SERVER (Sau 4105 giây)
 -- ==========================================
-task.delay(4105, function()
+task.delay(3800, function()
+    local Players = game:GetService("Players")
+    local TeleportService = game:GetService("TeleportService")
+    local LocalPlayer = Players.LocalPlayer
+
     if #Players:GetPlayers() <= 1 then
         pcall(function()
             TeleportService:Teleport(game.PlaceId, LocalPlayer)
         end)
     else
         pcall(function()
-            TeleportService:TeleportToPlaceInstance(
-                game.PlaceId,
-                game.JobId,
-                LocalPlayer
-            )
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
         end)
     end
 end)
--- ==========================================
--- AUTO RETRY (Sau 7 phút = 420 giây)
--- ==========================================
+
 task.delay(10, function()
-    local success = false
-    for i = 1, 5 do
-        success = pcall(function()
-            game:GetService("ReplicatedStorage")
-                .Remotes
-                .client_server
-                .teleport_replay
-                :InvokeServer()
-        end)
-        if success then
-            break
-        end
-        task.wait(2)
-    end
+    game:GetService("ReplicatedStorage").Remotes.client_server.teleport_replay:InvokeServer()
 end)
 -- ==========================================
 -- 5. NÚT BẬT/TẮT MENU (DÀNH CHO PC & MOBILE DELTA)
