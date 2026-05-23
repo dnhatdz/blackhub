@@ -333,3 +333,84 @@ task.delay(420, function()
         pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer) end)
     end
 end)
+-- ==========================================
+-- 5. NÚT BẬT/TẮT MENU (DÀNH CHO PC & MOBILE DELTA)
+-- ==========================================
+local UserInputService = game:GetService("UserInputService")
+local menuVisible = true
+
+-- Hàm thực hiện hiệu ứng Ẩn/Hiện Menu mượt mà
+local function toggleMenu()
+    menuVisible = not menuVisible
+    local targetSize = menuVisible and UDim2.new(0, 550, 0, 350) or UDim2.new(0, 0, 0, 0)
+    local targetPos = menuVisible and UDim2.new(0.5, -275, 0.5, -175) or UDim2.new(0.5, 0, 0.5, 0)
+    
+    TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = targetSize,
+        Position = targetPos
+    }):Play()
+end
+
+-- Cách 1: Bấm phím Left Control (Ctrl Trái) trên PC để Ẩn/Hiện
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftControl then
+        toggleMenu()
+    end
+end)
+
+-- Cách 2: Tạo nút bấm nổi màu hồng (Floating Button) trên màn hình cho Mobile
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "HubToggleButton"
+ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Position = UDim2.new(0, 10, 0.5, -25) -- Vị trí mép trái màn hình
+ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- Màu hồng đậm
+ToggleButton.Text = "HUB"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.TextSize = 14
+ToggleButton.Parent = ScreenGui
+
+-- Làm tròn nút bấm nổi thành hình tròn
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 25)
+ButtonCorner.Parent = ToggleButton
+
+-- Viền trắng cho nút nổi bật
+local ButtonStroke = Instance.new("UIStroke")
+ButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+ButtonStroke.Thickness = 2
+ButtonStroke.Parent = ToggleButton
+
+-- Click vào nút tròn sẽ Ẩn/Hiện menu
+ToggleButton.MouseButton1Click:Connect(function()
+    toggleMenu()
+end)
+
+-- Tính năng kéo thả nút bấm nổi trên màn hình Mobile (Drag Feature)
+local dragging, dragInput, dragStart, startPos
+ToggleButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = ToggleButton.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+ToggleButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        ToggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
