@@ -235,8 +235,6 @@ end
 local function tableToCFrame(tbl)
     return CFrame.new(unpack(tbl))
 end
-
--- Hook an toàn sử dụng hookmetamethod hỗ trợ Delta Executor
 local oldNamecall
 oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
@@ -251,11 +249,8 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
             saveSettings()
         end
     end
-    
     return oldNamecall(self, ...)
 end)
-
--- Setup Tab FARM
 createToggle(FarmContainer, "Ghi lại hành động (Record)", false, function(state)
     isRecording = state
     if state then
@@ -263,13 +258,10 @@ createToggle(FarmContainer, "Ghi lại hành động (Record)", false, function(
         saveSettings()
     end
 end)
-
 createToggle(FarmContainer, "Bắt đầu phát Macro (Play)", false, function(state)
     isPlaying = state
     saveSettings()
 end)
-
--- Vòng lặp phát lệnh Spawn từ Macro (Mỗi 2 giây)
 task.spawn(function()
     local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
@@ -283,29 +275,14 @@ task.spawn(function()
         end
     end
 end)
-
--- Setup Tab AUTO
 createToggle(AutoContainer, "Auto Nâng Cấp (Upgrade 1-8)", macroData.autoUpgrade, function(state)
     macroData.autoUpgrade = state
     saveSettings()
 end)
-
 createToggle(AutoContainer, "Auto Kỹ Năng (Ability 1-8)", macroData.autoAbility, function(state)
     macroData.autoAbility = state
     saveSettings()
 end)
-createToggle(AutoContainer, "Chế độ giảm tải CPU (AFK)", false, function(state)
-    AfkFrame.Visible = state
-    saveSettings()
-    if state then
-        -- Ngắt tạm thời việc render hình ảnh 3D để giảm tối đa mức sử dụng CPU/GPU
-        RunService:Set3dRenderingEnabled(false)
-    else
-        RunService:Set3dRenderingEnabled(true)
-    end
-end)
-
--- Vòng lặp Auto nâng cấp & dùng chiêu
 task.spawn(function()
     local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
