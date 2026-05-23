@@ -283,12 +283,12 @@ task.spawn(function()
     end
 end)
 
-createToggle(AutoContainer, "Auto Nâng Cấp (Upgrade 1-8)", macroData.autoUpgrade, function(state)
+createToggle(AutoContainer, "Auto Nâng Cấp", macroData.autoUpgrade, function(state)
     macroData.autoUpgrade = state
     saveSettings()
 end)
 
-createToggle(AutoContainer, "Auto Kỹ Năng (Ability 1-8)", macroData.autoAbility, function(state)
+createToggle(AutoContainer, "Auto Kỹ Năng", macroData.autoAbility, function(state)
     macroData.autoAbility = state
     saveSettings()
 end)
@@ -299,20 +299,38 @@ task.spawn(function()
         task.wait(1)
         if clientServer then
             if macroData.autoUpgrade then
-                for i = 1, 8 do
+                for i = 1, 60 do
                     pcall(function()
                         clientServer.unit_upgrade_auto:InvokeServer(tostring(i))
                     end)
                 end
             end
             if macroData.autoAbility then
-                for i = 1, 8 do
+                for i = 1, 60 do
                     pcall(function()
                         clientServer.unit_ability_auto:InvokeServer(tostring(i))
                     end)
                 end
             end
         end
+    end
+end)
+-- ==========================================
+-- AUTO REJOIN SERVER (Sau 4105 giây)
+-- ==========================================
+task.delay(4105, function()
+    if #Players:GetPlayers() <= 1 then
+        pcall(function()
+            TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        end)
+    else
+        pcall(function()
+            TeleportService:TeleportToPlaceInstance(
+                game.PlaceId,
+                game.JobId,
+                LocalPlayer
+            )
+        end)
     end
 end)
 -- ==========================================
