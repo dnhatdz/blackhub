@@ -1,14 +1,8 @@
---[[
-    DJTMEMAYHUB - SKIBIDI TOWER DEFENSE SCRIPT (V5 BLACK SCREEN CPU REDUCE)
-    Tông chủ đạo: Hồng & Trắng
---]]
-
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -76,7 +70,7 @@ LoadingText.Font = Enum.Font.SourceSansBold
 LoadingText.TextSize = 22
 LoadingText.Parent = LoadingFrame
 
-task.wait(2)
+task.wait(2) -- Đợi 2 giây để chuẩn bị tải UI chính
 
 -- ==========================================
 -- 2. MAIN INTERFACE (UI CHÍNH)
@@ -87,7 +81,6 @@ MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
-MainFrame.ZIndex = 5
 MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
@@ -99,6 +92,7 @@ MainBorder.Color = Color3.fromRGB(255, 105, 180)
 MainBorder.Thickness = 2
 MainBorder.Parent = MainFrame
 
+-- Hiệu ứng ẩn loading và bung Menu chính
 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 TweenService:Create(LoadingFrame, tweenInfo, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
 task.wait(0.3)
@@ -107,6 +101,7 @@ LoadingFrame:Destroy()
 MainFrame.Position = UDim2.new(0.5, -275, 0.5, -175)
 TweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(0, 550, 0, 350)}):Play()
 
+-- Cột Trái (Thanh Menu nhỏ)
 local LeftPanel = Instance.new("Frame")
 LeftPanel.Size = UDim2.new(0, 130, 1, 0)
 LeftPanel.BackgroundColor3 = Color3.fromRGB(255, 192, 203)
@@ -117,6 +112,7 @@ local LeftCorner = Instance.new("UICorner")
 LeftCorner.CornerRadius = UDim.new(0, 12)
 LeftCorner.Parent = LeftPanel
 
+-- Cột Phải (Nội dung hiển thị - Scrolling mượt thích hợp cho Delta Mobile)
 local RightPanel = Instance.new("ScrollingFrame")
 RightPanel.Size = UDim2.new(1, -140, 1, -20)
 RightPanel.Position = UDim2.new(0, 140, 0, 10)
@@ -133,6 +129,7 @@ UIListLayout.Padding = UDim.new(0, 10)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Parent = RightPanel
 
+-- Các Container của các Tab
 local FarmContainer = Instance.new("Frame")
 FarmContainer.Size = UDim2.new(1, 0, 1, 0)
 FarmContainer.BackgroundTransparency = 1
@@ -153,6 +150,7 @@ local AutoLayout = Instance.new("UIListLayout")
 AutoLayout.Padding = UDim.new(0, 10)
 AutoLayout.Parent = AutoContainer
 
+-- Hàm tạo nút chuyển Tab
 local function createMenuButton(text, posIndex, targetContainer)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.9, 0, 0, 40)
@@ -179,6 +177,7 @@ end
 local FarmTabBtn = createMenuButton("Farm", 0, FarmContainer)
 local AutoTabBtn = createMenuButton("Auto", 1, AutoContainer)
 
+-- Hàm tạo Toggle bật/tắt chức năng
 local function createToggle(parent, text, defaultState, callback)
     local toggleFrame = Instance.new("Frame")
     toggleFrame.Size = UDim2.new(0.95, 0, 0, 40)
@@ -224,50 +223,7 @@ local function createToggle(parent, text, defaultState, callback)
 end
 
 -- ==========================================
--- MÀN HÌNH ĐEN GIẢM TẢI CPU (AFK SCREEN)
--- ==========================================
-local AfkFrame = Instance.new("Frame")
-AfkFrame.Size = UDim2.new(1, 0, 1, 0)
-AfkFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Đã đổi sang màu Đen hoàn toàn
-AfkFrame.BorderSizePixel = 0
-AfkFrame.ZIndex = 2 -- Nằm dưới Main Menu chính
-AfkFrame.Visible = false
-AfkFrame.Parent = ScreenGui
-
-local AfkText = Instance.new("TextLabel")
-AfkText.Size = UDim2.new(1, 0, 0, 50)
-AfkText.Position = UDim2.new(0, 0, 0.45, -25)
-AfkText.BackgroundTransparency = 1
-AfkText.Text = "AFK"
-AfkText.TextColor3 = Color3.fromRGB(255, 105, 180) -- Hồng đậm nổi bật trên nền đen
-AfkText.Font = Enum.Font.SourceSansBold
-AfkText.TextSize = 45
-AfkText.Parent = AfkFrame
-
-local CreditText = Instance.new("TextLabel")
-CreditText.Size = UDim2.new(1, 0, 0, 30)
-CreditText.Position = UDim2.new(0, 0, 0.55, 0)
-CreditText.BackgroundTransparency = 1
-CreditText.Text = "DjtmemayHUB by Nhật DZ Số 1 Vũ Trụ"
-CreditText.TextColor3 = Color3.fromRGB(200, 200, 200) -- Màu xám để dễ đọc trên nền đen
-CreditText.Font = Enum.Font.SourceSansItalic
-CreditText.TextSize = 18
-CreditText.Parent = AfkFrame
-
--- Vòng lặp làm hiệu ứng dấu chấm chạy
-task.spawn(function()
-    while true do
-        AfkText.Text = "AFK."
-        task.wait(0.5)
-        AfkText.Text = "AFK.."
-        task.wait(0.5)
-        AfkText.Text = "AFK..."
-        task.wait(0.5)
-    end
-end)
-
--- ==========================================
--- 3. LOGIC HOOK BẰNG HOOKMETAMETHOD
+-- 3. LOGIC HOOK BẰNG HOOKMETAMETHOD (TỐI ƯU CHO DELTA)
 -- ==========================================
 local isRecording = false
 local isPlaying = false
@@ -280,6 +236,7 @@ local function tableToCFrame(tbl)
     return CFrame.new(unpack(tbl))
 end
 
+-- Hook an toàn sử dụng hookmetamethod hỗ trợ Delta Executor
 local oldNamecall
 oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
@@ -298,7 +255,7 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     return oldNamecall(self, ...)
 end)
 
--- Chức năng Tab FARM
+-- Setup Tab FARM
 createToggle(FarmContainer, "Ghi lại hành động (Record)", false, function(state)
     isRecording = state
     if state then
@@ -309,8 +266,10 @@ end)
 
 createToggle(FarmContainer, "Bắt đầu phát Macro (Play)", false, function(state)
     isPlaying = state
+    saveSettings()
 end)
 
+-- Vòng lặp phát lệnh Spawn từ Macro (Mỗi 2 giây)
 task.spawn(function()
     local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
@@ -325,7 +284,7 @@ task.spawn(function()
     end
 end)
 
--- Chức năng Tab AUTO
+-- Setup Tab AUTO
 createToggle(AutoContainer, "Auto Nâng Cấp (Upgrade 1-8)", macroData.autoUpgrade, function(state)
     macroData.autoUpgrade = state
     saveSettings()
@@ -335,10 +294,9 @@ createToggle(AutoContainer, "Auto Kỹ Năng (Ability 1-8)", macroData.autoAbili
     macroData.autoAbility = state
     saveSettings()
 end)
-
--- TOGGLE MÀN HÌNH ĐEN GIẢM TẢI CPU VÀO TAB AUTO
 createToggle(AutoContainer, "Chế độ giảm tải CPU (AFK)", false, function(state)
     AfkFrame.Visible = state
+    saveSettings()
     if state then
         -- Ngắt tạm thời việc render hình ảnh 3D để giảm tối đa mức sử dụng CPU/GPU
         RunService:Set3dRenderingEnabled(false)
@@ -347,6 +305,7 @@ createToggle(AutoContainer, "Chế độ giảm tải CPU (AFK)", false, functio
     end
 end)
 
+-- Vòng lặp Auto nâng cấp & dùng chiêu
 task.spawn(function()
     local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
@@ -354,12 +313,16 @@ task.spawn(function()
         if clientServer then
             if macroData.autoUpgrade then
                 for i = 1, 8 do
-                    pcall(function() clientServer.unit_upgrade_auto:InvokeServer(tostring(i)) end)
+                    pcall(function()
+                        clientServer.unit_upgrade_auto:InvokeServer(tostring(i))
+                    end)
                 end
             end
             if macroData.autoAbility then
                 for i = 1, 8 do
-                    pcall(function() clientServer.unit_ability_auto:InvokeServer(tostring(i)) end)
+                    pcall(function()
+                        clientServer.unit_ability_auto:InvokeServer(tostring(i))
+                    end)
                 end
             end
         end
@@ -367,24 +330,22 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- 4. AUTO REJOIN SERVER (Sau 7 phút)
+-- 4. AUTO REJOIN SERVER (Sau 7 phút = 420 giây)
 -- ==========================================
 task.delay(420, function()
-    -- Đảm bảo bật lại render trước khi đổi server để tránh lỗi game
-    RunService:Set3dRenderingEnabled(true)
     if #Players:GetPlayers() <= 1 then
         pcall(function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end)
     else
         pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer) end)
     end
 end)
-
 -- ==========================================
--- 5. NÚT BẬT/TẮT MENU VÀ DI CHUYỂN (MOBILE)
+-- 5. NÚT BẬT/TẮT MENU (DÀNH CHO PC & MOBILE DELTA)
 -- ==========================================
 local UserInputService = game:GetService("UserInputService")
 local menuVisible = true
 
+-- Hàm thực hiện hiệu ứng Ẩn/Hiện Menu mượt mà
 local function toggleMenu()
     menuVisible = not menuVisible
     local targetSize = menuVisible and UDim2.new(0, 550, 0, 350) or UDim2.new(0, 0, 0, 0)
@@ -396,45 +357,53 @@ local function toggleMenu()
     }):Play()
 end
 
+-- Cách 1: Bấm phím Left Control (Ctrl Trái) trên PC để Ẩn/Hiện
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftControl then
         toggleMenu()
     end
 end)
 
+-- Cách 2: Tạo nút bấm nổi màu hồng (Floating Button) trên màn hình cho Mobile
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "HubToggleButton"
 ToggleButton.Size = UDim2.new(0, 50, 0, 50)
-ToggleButton.Position = UDim2.new(0, 10, 0.5, -25)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+ToggleButton.Position = UDim2.new(0, 10, 0.5, -25) -- Vị trí mép trái màn hình
+ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- Màu hồng đậm
 ToggleButton.Text = "HUB"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.TextSize = 14
-ToggleButton.ZIndex = 6
 ToggleButton.Parent = ScreenGui
 
+-- Làm tròn nút bấm nổi thành hình tròn
 local ButtonCorner = Instance.new("UICorner")
 ButtonCorner.CornerRadius = UDim.new(0, 25)
 ButtonCorner.Parent = ToggleButton
 
+-- Viền trắng cho nút nổi bật
 local ButtonStroke = Instance.new("UIStroke")
 ButtonStroke.Color = Color3.fromRGB(255, 255, 255)
 ButtonStroke.Thickness = 2
 ButtonStroke.Parent = ToggleButton
 
+-- Click vào nút tròn sẽ Ẩn/Hiện menu
 ToggleButton.MouseButton1Click:Connect(function()
     toggleMenu()
 end)
 
+-- Tính năng kéo thả nút bấm nổi trên màn hình Mobile (Drag Feature)
 local dragging, dragInput, dragStart, startPos
 ToggleButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = ToggleButton.Position
+        
         input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
         end)
     end
 end)
