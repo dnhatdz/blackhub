@@ -239,8 +239,6 @@ local oldNamecall
 oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
-    
-    -- Kiểm tra trực tiếp biến lưu trong macroData
     if macroData.isRecording and method == "InvokeServer" and self.Name == "unit_spawn" then
         if args[1] and typeof(args[2]) == "CFrame" then
             table.insert(macroData.spawnCommands, {
@@ -252,8 +250,6 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     end
     return oldNamecall(self, ...)
 end)
-
--- Nút Record đã liên kết đồng bộ với hệ thống Auto Save file JSON
 createToggle(FarmContainer, "Ghi lại hành động (Record)", macroData.isRecording, function(state)
     macroData.isRecording = state
     if state then
@@ -288,7 +284,7 @@ createToggle(AutoContainer, "Auto Nâng Cấp", macroData.autoUpgrade, function(
     saveSettings()
 end)
 
-createToggle(AutoContainer, "Auto Kỹ Năng", macroData.autoAbility, function(state)
+createToggle(AutoContainer, "Auto Ability", macroData.autoAbility, function(state)
     macroData.autoAbility = state
     saveSettings()
 end)
@@ -299,14 +295,14 @@ task.spawn(function()
         task.wait(1)
         if clientServer then
             if macroData.autoUpgrade then
-                for i = 1, 60 do
+                for i = 1, 100 do
                     pcall(function()
                         clientServer.unit_upgrade_auto:InvokeServer(tostring(i))
                     end)
                 end
             end
             if macroData.autoAbility then
-                for i = 1, 60 do
+                for i = 1, 100 do
                     pcall(function()
                         clientServer.unit_ability_auto:InvokeServer(tostring(i))
                     end)
@@ -316,7 +312,7 @@ task.spawn(function()
     end
 end)
 -- ==========================================
--- AUTO REJOIN SERVER (Sau 4105 giây)
+-- auto rejoin + auto retry
 -- ==========================================
 task.delay(3800, function()
     local Players = game:GetService("Players")
