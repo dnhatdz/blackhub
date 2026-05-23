@@ -320,8 +320,11 @@ task.delay(3600, function()
     end
 end)
 
-task.delay(10, function()
-    game:GetService("ReplicatedStorage").Remotes.client_server.teleport_replay:InvokeServer()
+task.spawn(function()
+    while true do
+        task.wait(10) -- Đợi 10 giây
+        game:GetService("ReplicatedStorage").Remotes.client_server.teleport_replay:InvokeServer()
+    end
 end)
 
 local UserInputService = game:GetService("UserInputService")
