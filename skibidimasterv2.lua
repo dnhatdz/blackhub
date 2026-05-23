@@ -1,35 +1,33 @@
 local Title = Instance.new("TextLabel")
 Title.Name = "GUITitle"
-Title.Parent = MainFrame
+Title.Parent = nil
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0.5, 0, 0, 12) -- Căn giữa và cách mép trên 12px
+Title.Position = UDim2.new(0.5, 0, 0, 10)
 Title.AnchorPoint = Vector2.new(0.5, 0)
 Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Font = Enum.Font.GothamBold -- Font chữ hiện đại và đậm
+Title.Font = Enum.Font.GothamBold
 Title.Text = "Skibidi Master Tower Defense v2"
-Title.TextColor3 = Color3.fromRGB(255, 20, 147) -- Màu hồng đậm (Deep Pink)
-Title.TextSize = 22
-Title.ZIndex = 5 -- Đảm bảo chữ luôn nằm trên cùng
+Title.TextColor3 = Color3.fromRGB(255, 20, 147)
+Title.TextSize = 20
+Title.ZIndex = 5
+
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- File cấu hình (Đã cập nhật để tự động lưu trạng thái On/Off của Record và Play)
 local FILE_NAME = "Skibidi_Master.json"
 local macroData = {
-    spawnCommands = {}, 
+    spawnCommands = {},
     autoUpgrade = false,
     autoAbility = false,
-    isRecording = false, -- Thêm trạng thái lưu Record
-    isPlaying = false    -- Thêm trạng thái lưu Play
+    isRecording = false,
+    isPlaying = false
 }
 
--- Hàm lưu/tải file cấu hình
 local function saveSettings()
     if writefile then
         pcall(function()
@@ -43,22 +41,19 @@ local function loadSettings()
         local success, content = pcall(readfile, FILE_NAME)
         if success then
             local decoded = HttpService:JSONDecode(content)
-            if decoded then macroData = decoded end
+            if decoded then
+                macroData = decoded
+            end
         end
     end
 end
-
 loadSettings()
 
--- Khởi tạo ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DjtmestayHub_Gui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
--- ==========================================
--- 1. LOADING SCREEN
--- ==========================================
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Size = UDim2.new(0, 300, 0, 300)
 LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
@@ -83,12 +78,8 @@ LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
 LoadingText.Font = Enum.Font.SourceSansBold
 LoadingText.TextSize = 22
 LoadingText.Parent = LoadingFrame
+task.wait(2)
 
-task.wait(2) -- Đợi 2 giây để chuẩn bị tải UI chính
-
--- ==========================================
--- 2. MAIN INTERFACE (UI CHÍNH)
--- ==========================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -97,16 +88,17 @@ MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 12)
-MainCorner.Parent = MainFrame
-
-local MainBorder = Instance.new("UIStroke")
+MainBorder = Instance.new("UIStroke")
 MainBorder.Color = Color3.fromRGB(255, 105, 180)
 MainBorder.Thickness = 2
 MainBorder.Parent = MainFrame
 
--- Hiệu ứng ẩn loading và bung Menu chính
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
+Title.Parent = MainFrame
+
 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 TweenService:Create(LoadingFrame, tweenInfo, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
 task.wait(0.3)
@@ -115,9 +107,9 @@ LoadingFrame:Destroy()
 MainFrame.Position = UDim2.new(0.5, -275, 0.5, -175)
 TweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(0, 550, 0, 350)}):Play()
 
--- Cột Trái (Thanh Menu nhỏ)
 local LeftPanel = Instance.new("Frame")
-LeftPanel.Size = UDim2.new(0, 130, 1, 0)
+LeftPanel.Size = UDim2.new(0, 130, 1, -45)
+LeftPanel.Position = UDim2.new(0, 0, 0, 45)
 LeftPanel.BackgroundColor3 = Color3.fromRGB(255, 192, 203)
 LeftPanel.BorderSizePixel = 0
 LeftPanel.Parent = MainFrame
@@ -126,16 +118,15 @@ local LeftCorner = Instance.new("UICorner")
 LeftCorner.CornerRadius = UDim.new(0, 12)
 LeftCorner.Parent = LeftPanel
 
--- Cột Phải (Nội dung hiển thị - Scrolling mượt thích hợp cho Delta Mobile)
 local RightPanel = Instance.new("ScrollingFrame")
-RightPanel.Size = UDim2.new(1, -140, 1, -20)
-RightPanel.Position = UDim2.new(0, 140, 0, 10)
+RightPanel.Size = UDim2.new(1, -140, 1, -55)
+RightPanel.Position = UDim2.new(0, 140, 0, 45)
 RightPanel.BackgroundTransparency = 1
 RightPanel.BorderSizePixel = 0
 RightPanel.CanvasSize = UDim2.new(0, 0, 0, 450)
 RightPanel.ScrollBarThickness = 4
 RightPanel.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-RightPanel.ElasticBehavior = Enum.ElasticBehavior.Always 
+RightPanel.ElasticBehavior = Enum.ElasticBehavior.Always
 RightPanel.Parent = MainFrame
 
 local UIListLayout = Instance.new("UIListLayout")
@@ -143,7 +134,6 @@ UIListLayout.Padding = UDim.new(0, 10)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Parent = RightPanel
 
--- Các Container của các Tab
 local FarmContainer = Instance.new("Frame")
 FarmContainer.Size = UDim2.new(1, 0, 1, 0)
 FarmContainer.BackgroundTransparency = 1
@@ -164,7 +154,6 @@ local AutoLayout = Instance.new("UIListLayout")
 AutoLayout.Padding = UDim.new(0, 10)
 AutoLayout.Parent = AutoContainer
 
--- Hàm tạo nút chuyển Tab
 local function createMenuButton(text, posIndex, targetContainer)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.9, 0, 0, 40)
@@ -179,7 +168,7 @@ local function createMenuButton(text, posIndex, targetContainer)
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 8)
     btnCorner.Parent = btn
-
+    
     btn.MouseButton1Click:Connect(function()
         FarmContainer.Visible = false
         AutoContainer.Visible = false
@@ -191,7 +180,6 @@ end
 local FarmTabBtn = createMenuButton("Farm", 0, FarmContainer)
 local AutoTabBtn = createMenuButton("Auto", 1, AutoContainer)
 
--- Hàm tạo Toggle bật/tắt chức năng
 local function createToggle(parent, text, defaultState, callback)
     local toggleFrame = Instance.new("Frame")
     toggleFrame.Size = UDim2.new(0.95, 0, 0, 40)
@@ -201,7 +189,7 @@ local function createToggle(parent, text, defaultState, callback)
     local tfCorner = Instance.new("UICorner")
     tfCorner.CornerRadius = UDim.new(0, 6)
     tfCorner.Parent = toggleFrame
-
+    
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.7, 0, 1, 0)
     label.Position = UDim2.new(0, 10, 0, 0)
@@ -212,7 +200,7 @@ local function createToggle(parent, text, defaultState, callback)
     label.TextSize = 16
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = toggleFrame
-
+    
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 60, 0, 26)
     btn.Position = UDim2.new(1, -70, 0.5, -13)
@@ -226,7 +214,7 @@ local function createToggle(parent, text, defaultState, callback)
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 13)
     btnCorner.Parent = btn
-
+    
     local state = defaultState
     btn.MouseButton1Click:Connect(function()
         state = not state
@@ -236,9 +224,6 @@ local function createToggle(parent, text, defaultState, callback)
     end)
 end
 
--- ==========================================
--- 3. LOGIC HOOK BẰNG HOOKMETAMETHOD
--- ==========================================
 local function cframeToTable(cf)
     return {cf:GetComponents()}
 end
@@ -253,24 +238,21 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local args = {...}
     if macroData.isRecording and method == "InvokeServer" and self.Name == "unit_spawn" then
         if args[1] and typeof(args[2]) == "CFrame" then
-            table.insert(macroData.spawnCommands, {
-                unitId = args[1],
-                cframe = cframeToTable(args[2])
-            })
+            table.insert(macroData.spawnCommands, {unitId = args[1], cframe = cframeToTable(args[2])})
             saveSettings()
         end
     end
     return oldNamecall(self, ...)
 end)
+
 createToggle(FarmContainer, "Ghi lại hành động (Record)", macroData.isRecording, function(state)
     macroData.isRecording = state
     if state then
-        macroData.spawnCommands = {} -- Xóa dữ liệu cũ nếu bật ghi mới
+        macroData.spawnCommands = {}
     end
     saveSettings()
 end)
 
--- Nút Play đã liên kết đồng bộ với hệ thống Auto Save file JSON
 createToggle(FarmContainer, "Bắt đầu phát Macro (Play)", macroData.isPlaying, function(state)
     macroData.isPlaying = state
     saveSettings()
@@ -280,7 +262,6 @@ task.spawn(function()
     local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
         task.wait(2)
-        -- Sử dụng dữ liệu lưu sẵn từ bộ nhớ cấu hình
         if macroData.isPlaying and #macroData.spawnCommands > 0 and clientServer then
             for _, command in ipairs(macroData.spawnCommands) do
                 pcall(function()
@@ -323,14 +304,11 @@ task.spawn(function()
         end
     end
 end)
--- ==========================================
--- auto rejoin + auto retry
--- ==========================================
-task.delay(3800, function()
+
+task.delay(3600, function()
     local Players = game:GetService("Players")
     local TeleportService = game:GetService("TeleportService")
     local LocalPlayer = Players.LocalPlayer
-
     if #Players:GetPlayers() <= 1 then
         pcall(function()
             TeleportService:Teleport(game.PlaceId, LocalPlayer)
@@ -345,21 +323,14 @@ end)
 task.delay(10, function()
     game:GetService("ReplicatedStorage").Remotes.client_server.teleport_replay:InvokeServer()
 end)
--- ==========================================
--- 5. NÚT BẬT/TẮT MENU (DÀNH CHO PC & MOBILE DELTA)
--- ==========================================
+
 local UserInputService = game:GetService("UserInputService")
 local menuVisible = true
-
 local function toggleMenu()
     menuVisible = not menuVisible
     local targetSize = menuVisible and UDim2.new(0, 550, 0, 350) or UDim2.new(0, 0, 0, 0)
     local targetPos = menuVisible and UDim2.new(0.5, -275, 0.5, -175) or UDim2.new(0.5, 0, 0.5, 0)
-    
-    TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        Size = targetSize,
-        Position = targetPos
-    }):Play()
+    TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize, Position = targetPos}):Play()
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -398,7 +369,6 @@ ToggleButton.InputBegan:Connect(function(input)
         dragging = true
         dragStart = input.Position
         startPos = ToggleButton.Position
-        
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
