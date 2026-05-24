@@ -288,14 +288,14 @@ task.spawn(function()
         task.wait(1)
         if clientServer then
             if macroData.autoUpgrade then
-                for i = 1, 100 do
+                for i = 1, 500 do
                     pcall(function()
                         clientServer.unit_upgrade_auto:InvokeServer(tostring(i))
                     end)
                 end
             end
             if macroData.autoAbility then
-                for i = 1, 100 do
+                for i = 1, 500 do
                     pcall(function()
                         clientServer.unit_ability_auto:InvokeServer(tostring(i))
                     end)
@@ -322,7 +322,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(10) -- Đợi 10 giây
+        task.wait(10)
         game:GetService("ReplicatedStorage").Remotes.client_server.teleport_replay:InvokeServer()
     end
 end)
