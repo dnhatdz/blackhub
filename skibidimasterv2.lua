@@ -304,20 +304,32 @@ task.spawn(function()
         end
     end
 end)
+repeat task.wait() until game:IsLoaded()
 
-task.delay(3600, function()
-    local Players = game:GetService("Players")
-    local TeleportService = game:GetService("TeleportService")
-    local LocalPlayer = Players.LocalPlayer
-    if #Players:GetPlayers() <= 1 then
-        pcall(function()
-            TeleportService:Teleport(game.PlaceId, LocalPlayer)
-        end)
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local GuiService = game:GetService("GuiService")
+local LocalPlayer = Players.LocalPlayer
+
+local REJOIN_INTERVAL = 3600
+local REJOIN_DELAY = 5
+
+local function doTeleport()
+    task.wait(REJOIN_DELAY)
+    if game.JobId ~= "" then
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
     else
-        pcall(function()
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
-        end)
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
     end
+end
+
+task.spawn(function()
+    task.wait(REJOIN_INTERVAL)
+    doTeleport()
+end)
+
+GuiService.ErrorMessageChanged:Connect(function()
+    doTeleport()
 end)
 
 task.spawn(function()
