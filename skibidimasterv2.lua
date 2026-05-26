@@ -288,14 +288,14 @@ task.spawn(function()
         task.wait(1)
         if clientServer then
             if macroData.autoUpgrade then
-                for i = 1, 500 do
+                for i = 1, 100 do
                     pcall(function()
                         clientServer.unit_upgrade_auto:InvokeServer(tostring(i))
                     end)
                 end
             end
             if macroData.autoAbility then
-                for i = 1, 500 do
+                for i = 1, 100 do
                     pcall(function()
                         clientServer.unit_ability_auto:InvokeServer(tostring(i))
                     end)
