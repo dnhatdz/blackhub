@@ -1,26 +1,79 @@
-local Title = Instance.new("TextLabel")
-Title.Name = "GUITitle"
-Title.Parent = nil
-Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0.5, 0, 0, 10)
-Title.AnchorPoint = Vector2.new(0.5, 0)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Font = Enum.Font.GothamBold
-Title.Text = "Skibidi Master Tower Defense v2"
-Title.TextColor3 = Color3.fromRGB(255, 20, 147)
-Title.TextSize = 20
-
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GuiService = game:GetService("GuiService")
 local UserInputService = game:GetService("UserInputService")
+
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local FILE_NAME = "Skibidi_Master.json"
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SkibidiMaster_PremiumHub"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = PlayerGui
+
+if game.PlaceId ~= 15111895255 then
+    local ErrorFrame = Instance.new("Frame")
+    ErrorFrame.Size = UDim2.new(0, 320, 0, 140)
+    ErrorFrame.Position = UDim2.new(0.5, -160, 0.5, -70)
+    ErrorFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    ErrorFrame.BorderSizePixel = 0
+    ErrorFrame.Parent = ScreenGui
+
+    local ErrorCorner = Instance.new("UICorner")
+    ErrorCorner.CornerRadius = UDim.new(0, 8)
+    ErrorCorner.Parent = ErrorFrame
+
+    local ErrorStroke = Instance.new("UIStroke")
+    ErrorStroke.Color = Color3.fromRGB(255, 50, 50)
+    ErrorStroke.Thickness = 2
+    ErrorStroke.Parent = ErrorFrame
+
+    local ErrorTitle = Instance.new("TextLabel")
+    ErrorTitle.Size = UDim2.new(1, -40, 0, 35)
+    ErrorTitle.Position = UDim2.new(0, 15, 0, 5)
+    ErrorTitle.BackgroundTransparency = 1
+    ErrorTitle.Text = "Hệ Thống Thông Báo"
+    ErrorTitle.TextColor3 = Color3.fromRGB(255, 50, 50)
+    ErrorTitle.Font = Enum.Font.GothamBold
+    ErrorTitle.TextSize = 16
+    ErrorTitle.TextXAlignment = Enum.TextXAlignment.Left
+    ErrorTitle.Parent = ErrorFrame
+
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+    CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+    CloseBtn.BackgroundTransparency = 1
+    CloseBtn.Text = "✕"
+    CloseBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.TextSize = 18
+    CloseBtn.Parent = ErrorFrame
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+
+    local ErrorText = Instance.new("TextLabel")
+    ErrorText.Size = UDim2.new(1, -30, 0, 70)
+    ErrorText.Position = UDim2.new(0, 15, 0, 45)
+    ErrorText.BackgroundTransparency = 1
+    ErrorText.Text = "Bản hack không hỗ trợ game này!\nVui lòng vào đúng Skibidi Tower Defense."
+    ErrorText.TextColor3 = Color3.fromRGB(220, 220, 220)
+    ErrorText.Font = Enum.Font.Gotham
+    ErrorText.TextSize = 14
+    ErrorText.TextWrapped = true
+    ErrorText.TextXAlignment = Enum.TextXAlignment.Left
+    ErrorText.TextYAlignment = Enum.TextYAlignment.Top
+    ErrorText.Parent = ErrorFrame
+
+    return
+end
+
+local FILE_NAME = "Skibidi_Master_V3.json"
 local macroData = {
     spawnCommands = {},
     autoUpgrade = false,
@@ -52,197 +105,313 @@ local function loadSettings()
 end
 loadSettings()
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DjtmestayHub_Gui"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
-
 local BlackScreenFrame = Instance.new("Frame")
 BlackScreenFrame.Size = UDim2.new(1, 0, 1, 0)
 BlackScreenFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 BlackScreenFrame.BorderSizePixel = 0
-BlackScreenFrame.DisplayOrder = 999998
+BlackScreenFrame.ZIndex = 999990
 BlackScreenFrame.Visible = macroData.blackScreen
 BlackScreenFrame.Parent = ScreenGui
 
 local BlackScreenText = Instance.new("TextLabel")
-BlackScreenText.Size = UDim2.new(1, 0, 0, 50)
-BlackScreenText.Position = UDim2.new(0, 0, 0.5, -25)
+BlackScreenText.Size = UDim2.new(1, 0, 0, 60)
+BlackScreenText.Position = UDim2.new(0, 0, 0.5, -30)
 BlackScreenText.BackgroundTransparency = 1
-BlackScreenText.Text = "BLACK SCREEN ACTIVE\nTurn off in UI if needed"
+BlackScreenText.Text = "CHẾ ĐỘ MÀN HÌNH ĐEN ĐANG BẬT\nBấm nút HUB để tắt cấu hình"
 BlackScreenText.TextColor3 = Color3.fromRGB(255, 20, 147)
-BlackScreenText.Font = Enum.Font.SourceSansBold
-BlackScreenText.TextSize = 24
+BlackScreenText.Font = Enum.Font.GothamBold
+BlackScreenText.TextSize = 20
 BlackScreenText.Parent = BlackScreenFrame
 
 local LoadingFrame = Instance.new("Frame")
-LoadingFrame.Size = UDim2.new(0, 300, 0, 300)
-LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
-LoadingFrame.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
+LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 LoadingFrame.BorderSizePixel = 0
+LoadingFrame.ZIndex = 999995
 LoadingFrame.Parent = ScreenGui
 
-local LoadingBorder = Instance.new("UIStroke")
-LoadingBorder.Color = Color3.fromRGB(255, 20, 147)
-LoadingBorder.Thickness = 4
-LoadingBorder.Parent = LoadingFrame
+local LoadingPattern = Instance.new("Frame")
+LoadingPattern.Size = UDim2.new(2, 0, 2, 0)
+LoadingPattern.Position = UDim2.new(-0.5, 0, -0.5, 0)
+LoadingPattern.BackgroundTransparency = 1
+LoadingPattern.Parent = LoadingFrame
 
-local LoadingCorner = Instance.new("UICorner")
-LoadingCorner.CornerRadius = UDim.new(0, 15)
-LoadingCorner.Parent = LoadingFrame
+local UIGridLayout = Instance.new("UIGridLayout")
+UIGridLayout.CellSize = UDim2.new(0, 40, 0, 40)
+UIGridLayout.CellPadding = UDim2.new(0, 0, 0, 0)
+UIGridLayout.Parent = LoadingPattern
+
+for i = 1, 600 do
+    local tile = Instance.new("Frame")
+    tile.BorderSizePixel = 0
+    local row = math.floor((i - 1) / 30)
+    local col = (i - 1) % 30
+    if (row + col) % 2 == 0 then
+        tile.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    else
+        tile.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    end
+    tile.Parent = LoadingPattern
+end
 
 local LoadingText = Instance.new("TextLabel")
-LoadingText.Size = UDim2.new(1, 0, 1, 0)
+LoadingText.Size = UDim2.new(0, 400, 0, 60)
+LoadingText.Position = UDim2.new(0.5, -200, 0.5, -30)
 LoadingText.BackgroundTransparency = 1
-LoadingText.Text = "DjtmemayHUB\n-\nSkibidi Tower Defense\n\nLoading..."
+LoadingText.Text = "Skibidi Master TD - HUB"
 LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-LoadingText.Font = Enum.Font.SourceSansBold
-LoadingText.TextSize = 22
+LoadingText.Font = Enum.Font.GothamBold
+LoadingText.TextSize = 28
+LoadingText.ZIndex = 999996
 LoadingText.Parent = LoadingFrame
-task.wait(2)
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true
-MainFrame.Parent = ScreenGui
+local LoadingBarBg = Instance.new("Frame")
+LoadingBarBg.Size = UDim2.new(0, 250, 0, 4)
+LoadingBarBg.Position = UDim2.new(0.5, -125, 0.5, 30)
+LoadingBarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+LoadingBarBg.BorderSizePixel = 0
+LoadingBarBg.ZIndex = 999996
+LoadingBarBg.Parent = LoadingFrame
 
-local MainBorder = Instance.new("UIStroke")
-MainBorder.Color = Color3.fromRGB(255, 105, 180)
-MainBorder.Thickness = 2
-MainBorder.Parent = MainFrame
+local LoadingBar = Instance.new("Frame")
+LoadingBar.Size = UDim2.new(0, 0, 1, 0)
+LoadingBar.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
+LoadingBar.BorderSizePixel = 0
+LoadingBar.ZIndex = 999996
+LoadingBar.Parent = LoadingBarBg
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 12)
-MainCorner.Parent = MainFrame
+local barTween = TweenService:Create(LoadingBar, TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
+barTween:Play()
+task.wait(2.2)
 
-Title.Parent = MainFrame
-
-local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-TweenService:Create(LoadingFrame, tweenInfo, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-task.wait(0.3)
+local fadeTween = TweenService:Create(LoadingFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1})
+fadeTween:Play()
+for _, v in ipairs(LoadingPattern:GetChildren()) do
+    if v:IsA("Frame") then
+        TweenService:Create(v, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+    end
+end
+TweenService:Create(LoadingText, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
+TweenService:Create(LoadingBarBg, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+TweenService:Create(LoadingBar, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+task.wait(0.5)
 LoadingFrame:Destroy()
 
-MainFrame.Position = UDim2.new(0.5, -275, 0.5, -175)
-TweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(0, 550, 0, 350)}):Play()
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 560, 0, 360)
+MainFrame.Position = UDim2.new(0.5, -280, 0.5, -180)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.ZIndex = 1000
+MainFrame.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainFrame
+
+local MainBorder = Instance.new("UIStroke")
+MainBorder.Color = Color3.fromRGB(255, 20, 147)
+MainBorder.Thickness = 1.5
+MainBorder.Parent = MainFrame
+
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 45)
+TopBar.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainFrame
+
+local TopBarCorner = Instance.new("UICorner")
+TopBarCorner.CornerRadius = UDim.new(0, 10)
+TopBarCorner.Parent = TopBar
+
+local TopBarFix = Instance.new("Frame")
+TopBarFix.Size = UDim2.new(1, 0, 0, 10)
+TopBarFix.Position = UDim2.new(0, 0, 1, -10)
+TopBarFix.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
+TopBarFix.BorderSizePixel = 0
+TopBarFix.Parent = TopBar
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, -30, 1, 0)
+TitleLabel.Position = UDim2.new(0, 15, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "Skibidi Master Tower Defense v2"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 16
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = TopBar
 
 local LeftPanel = Instance.new("Frame")
-LeftPanel.Size = UDim2.new(0, 130, 1, -45)
+LeftPanel.Size = UDim2.new(0, 140, 1, -45)
 LeftPanel.Position = UDim2.new(0, 0, 0, 45)
-LeftPanel.BackgroundColor3 = Color3.fromRGB(255, 192, 203)
+LeftPanel.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
 LeftPanel.BorderSizePixel = 0
 LeftPanel.Parent = MainFrame
 
-local LeftCorner = Instance.new("UICorner")
-LeftCorner.CornerRadius = UDim.new(0, 12)
-LeftCorner.Parent = LeftPanel
+local LeftLine = Instance.new("Frame")
+LeftLine.Size = UDim2.new(0, 1, 1, 0)
+LeftLine.Position = UDim2.new(1, -1, 0, 0)
+LeftLine.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+LeftLine.BorderSizePixel = 0
+LeftLine.Parent = LeftPanel
 
-local RightPanel = Instance.new("ScrollingFrame")
-RightPanel.Size = UDim2.new(1, -140, 1, -55)
-RightPanel.Position = UDim2.new(0, 140, 0, 45)
-RightPanel.BackgroundTransparency = 1
-RightPanel.BorderSizePixel = 0
-RightPanel.CanvasSize = UDim2.new(0, 0, 0, 450)
-RightPanel.ScrollBarThickness = 4
-RightPanel.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-RightPanel.ElasticBehavior = Enum.ElasticBehavior.Always
-RightPanel.Parent = MainFrame
+local LeftLayout = Instance.new("UIListLayout")
+LeftLayout.Padding = UDim.new(0, 6)
+LeftLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+LeftLayout.SortOrder = Enum.SortOrder.LayoutOrder
+LeftLayout.Parent = LeftPanel
 
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Padding = UDim.new(0, 10)
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Parent = RightPanel
+local LeftPadding = Instance.new("UIPadding")
+LeftPadding.PaddingTop = UDim.new(0, 15)
+LeftPadding.Parent = LeftPanel
 
-local FarmContainer = Instance.new("Frame")
+local ContainerFrame = Instance.new("Frame")
+ContainerFrame.Size = UDim2.new(1, -155, 1, -60)
+ContainerFrame.Position = UDim2.new(0, 145, 0, 50)
+ContainerFrame.BackgroundTransparency = 1
+ContainerFrame.Parent = MainFrame
+
+local FarmContainer = Instance.new("ScrollingFrame")
 FarmContainer.Size = UDim2.new(1, 0, 1, 0)
 FarmContainer.BackgroundTransparency = 1
+FarmContainer.BorderSizePixel = 0
+FarmContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+FarmContainer.ScrollBarThickness = 3
+FarmContainer.ScrollBarImageColor3 = Color3.fromRGB(255, 20, 147)
 FarmContainer.Visible = true
-FarmContainer.Parent = RightPanel
+FarmContainer.Parent = ContainerFrame
 
 local FarmLayout = Instance.new("UIListLayout")
-FarmLayout.Padding = UDim.new(0, 10)
+FarmLayout.Padding = UDim.new(0, 8)
+FarmLayout.SortOrder = Enum.SortOrder.LayoutOrder
 FarmLayout.Parent = FarmContainer
 
-local AutoContainer = Instance.new("Frame")
+local AutoContainer = Instance.new("ScrollingFrame")
 AutoContainer.Size = UDim2.new(1, 0, 1, 0)
 AutoContainer.BackgroundTransparency = 1
+AutoContainer.BorderSizePixel = 0
+AutoContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+AutoContainer.ScrollBarThickness = 3
+AutoContainer.ScrollBarImageColor3 = Color3.fromRGB(255, 20, 147)
 AutoContainer.Visible = false
-AutoContainer.Parent = RightPanel
+AutoContainer.Parent = ContainerFrame
 
 local AutoLayout = Instance.new("UIListLayout")
-AutoLayout.Padding = UDim.new(0, 10)
+AutoLayout.Padding = UDim.new(0, 8)
+AutoLayout.SortOrder = Enum.SortOrder.LayoutOrder
 AutoLayout.Parent = AutoContainer
 
-local function createMenuButton(text, posIndex, targetContainer)
+local currentTab = nil
+local function createMenuButton(text, targetContainer)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.9, 0, 0, 40)
-    btn.Position = UDim2.new(0.05, 0, 0, 15 + (posIndex * 50))
-    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Size = UDim2.new(0.85, 0, 0, 36)
+    btn.BackgroundColor3 = Color3.fromRGB(28, 28, 32)
     btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(255, 20, 147)
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 18
+    btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 13
     btn.Parent = LeftPanel
     
     local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.CornerRadius = UDim.new(0, 6)
     btnCorner.Parent = btn
+
+    local btnBorder = Instance.new("UIStroke")
+    btnBorder.Color = Color3.fromRGB(35, 35, 40)
+    btnBorder.Thickness = 1
+    btnBorder.Parent = btn
     
+    if targetContainer.Visible then
+        currentTab = btn
+        btn.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btnBorder.Color = Color3.fromRGB(255, 20, 147)
+    end
+
     btn.MouseButton1Click:Connect(function()
+        if currentTab then
+            TweenService:Create(currentTab, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(28, 28, 32), TextColor3 = Color3.fromRGB(180, 180, 180)}):Play()
+            currentTab:FindFirstChildOfClass("UIStroke").Color = Color3.fromRGB(35, 35, 40)
+        end
+        currentTab = btn
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 20, 147), TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+        btnBorder.Color = Color3.fromRGB(255, 20, 147)
+
         FarmContainer.Visible = false
         AutoContainer.Visible = false
         targetContainer.Visible = true
     end)
-    return btn
 end
 
-local FarmTabBtn = createMenuButton("Farm", 0, FarmContainer)
-local AutoTabBtn = createMenuButton("Auto", 1, AutoContainer)
+createMenuButton("Farm Mode", FarmContainer)
+createMenuButton("Auto Systems", AutoContainer)
 
 local function createToggle(parent, text, defaultState, callback)
     local toggleFrame = Instance.new("Frame")
-    toggleFrame.Size = UDim2.new(0.95, 0, 0, 40)
-    toggleFrame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+    toggleFrame.Size = UDim2.new(0.98, 0, 0, 46)
+    toggleFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
+    toggleFrame.BorderSizePixel = 0
     toggleFrame.Parent = parent
     
     local tfCorner = Instance.new("UICorner")
     tfCorner.CornerRadius = UDim.new(0, 6)
     tfCorner.Parent = toggleFrame
+
+    local tfBorder = Instance.new("UIStroke")
+    tfBorder.Color = Color3.fromRGB(32, 32, 36)
+    tfBorder.Thickness = 1
+    tfBorder.Parent = toggleFrame
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.7, 0, 1, 0)
-    label.Position = UDim2.new(0, 10, 0, 0)
+    label.Position = UDim2.new(0, 12, 0, 0)
     label.BackgroundTransparency = 1
     label.Text = text
-    label.TextColor3 = Color3.fromRGB(50, 50, 50)
-    label.Font = Enum.Font.SourceSansBold
-    label.TextSize = 16
+    label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 13
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = toggleFrame
     
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 60, 0, 26)
-    btn.Position = UDim2.new(1, -70, 0.5, -13)
-    btn.BackgroundColor3 = defaultState and Color3.fromRGB(255, 105, 180) or Color3.fromRGB(200, 200, 200)
-    btn.Text = defaultState and "ON" or "OFF"
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 14
-    btn.Parent = toggleFrame
+    local switchBg = Instance.new("TextButton")
+    switchBg.Size = UDim2.new(0, 44, 0, 22)
+    switchBg.Position = UDim2.new(1, -56, 0.5, -11)
+    switchBg.BackgroundColor3 = defaultState and Color3.fromRGB(255, 20, 147) or Color3.fromRGB(40, 40, 45)
+    switchBg.Text = ""
+    switchBg.Parent = toggleFrame
     
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 13)
-    btnCorner.Parent = btn
+    local sbCorner = Instance.new("UICorner")
+    sbCorner.CornerRadius = UDim.new(1, 0)
+    sbCorner.Parent = switchBg
+    
+    local switchBall = Instance.new("Frame")
+    switchBall.Size = UDim2.new(0, 16, 0, 16)
+    switchBall.Position = defaultState and UDim2.new(1, -20, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
+    switchBall.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    switchBall.BorderSizePixel = 0
+    switchBall.Parent = switchBg
+
+    local ballCorner = Instance.new("UICorner")
+    ballCorner.CornerRadius = UDim.new(1, 0)
+    ballCorner.Parent = switchBall
     
     local state = defaultState
-    btn.MouseButton1Click:Connect(function()
+    switchBg.MouseButton1Click:Connect(function()
         state = not state
-        btn.Text = state and "ON" or "OFF"
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = state and Color3.fromRGB(255, 105, 180) or Color3.fromRGB(200, 200, 200)}):Play()
+        local targetPos = state and UDim2.new(1, -20, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
+        local targetColor = state and Color3.fromRGB(255, 20, 147) or Color3.fromRGB(40, 40, 45)
+        
+        TweenService:Create(switchBall, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = targetPos}):Play()
+        TweenService:Create(switchBg, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetColor}):Play()
+        
         callback(state)
     end)
+    
+    if parent:IsA("ScrollingFrame") then
+        parent.CanvasSize = UDim2.new(0, 0, 0, parent.UIListLayout.AbsoluteContentSize.Y + 10)
+    end
 end
 
 local function cframeToTable(cf)
@@ -293,22 +462,22 @@ task.spawn(function()
     end
 end)
 
-createToggle(AutoContainer, "Auto Nâng Cấp", macroData.autoUpgrade, function(state)
+createToggle(AutoContainer, "Tự Động Nâng Cấp (Auto Upgrade)", macroData.autoUpgrade, function(state)
     macroData.autoUpgrade = state
     saveSettings()
 end)
 
-createToggle(AutoContainer, "Auto Ability", macroData.autoAbility, function(state)
+createToggle(AutoContainer, "Tự Động Kích Hoạt Kỹ Năng (Auto Ability)", macroData.autoAbility, function(state)
     macroData.autoAbility = state
     saveSettings()
 end)
 
-createToggle(AutoContainer, "Auto Gacha (Banner Open)", macroData.autoGacha, function(state)
+createToggle(AutoContainer, "Tự Động Gacha (Auto Banner Open)", macroData.autoGacha, function(state)
     macroData.autoGacha = state
     saveSettings()
 end)
 
-createToggle(AutoContainer, "Black Screen (Che màn hình)", macroData.blackScreen, function(state)
+createToggle(AutoContainer, "Chế Độ Màn Hình Đen (Black Screen)", macroData.blackScreen, function(state)
     macroData.blackScreen = state
     BlackScreenFrame.Visible = state
     saveSettings()
@@ -384,59 +553,14 @@ end)
 local menuVisible = true
 local function toggleMenu()
     menuVisible = not menuVisible
-    local targetSize = menuVisible and UDim2.new(0, 550, 0, 350) or UDim2.new(0, 0, 0, 0)
-    local targetPos = menuVisible and UDim2.new(0.5, -275, 0.5, -175) or UDim2.new(0.5, 0, 0.5, 0)
+    local targetSize = menuVisible and UDim2.new(0, 560, 0, 360) or UDim2.new(0, 0, 0, 0)
+    local targetPos = menuVisible and UDim2.new(0.5, -280, 0.5, -180) or UDim2.new(0.5, 0, 0.5, 0)
     TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize, Position = targetPos}):Play()
 end
 
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "HubToggleButton"
-ToggleButton.Size = UDim2.new(0, 50, 0, 50)
-ToggleButton.Position = UDim2.new(0, 10, 0.5, -25)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-ToggleButton.Text = "HUB"
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.Font = Enum.Font.SourceSansBold
-ToggleButton.TextSize = 14
-ToggleButton.DisplayOrder = 999999
-ToggleButton.Parent = ScreenGui
-
-local ButtonCorner = Instance.new("UICorner")
-ButtonCorner.CornerRadius = UDim.new(0, 25)
-ButtonCorner.Parent = ToggleButton
-
-local ButtonStroke = Instance.new("UIStroke")
-ButtonStroke.Color = Color3.fromRGB(255, 255, 255)
-ButtonStroke.Thickness = 2
-ButtonStroke.Parent = ToggleButton
-
-ToggleButton.MouseButton1Click:Connect(function()
-    toggleMenu()
-end)
-
-local dragging, dragInput, dragStart, startPos
-ToggleButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = ToggleButton.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-ToggleButton.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        ToggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+ToggleButton.Size = UDim2.new(0, 46, 0, 46)
+ToggleButton.Position = UDim2.new(0, 15, 0.5, -23)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
+Toggle
