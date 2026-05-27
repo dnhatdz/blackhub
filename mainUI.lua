@@ -15,64 +15,6 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = PlayerGui
 
-if game.PlaceId ~= 15111895255 then
-    local ErrorFrame = Instance.new("Frame")
-    ErrorFrame.Size = UDim2.new(0, 320, 0, 140)
-    ErrorFrame.Position = UDim2.new(0.5, -160, 0.5, -70)
-    ErrorFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    ErrorFrame.BorderSizePixel = 0
-    ErrorFrame.Parent = ScreenGui
-
-    local ErrorCorner = Instance.new("UICorner")
-    ErrorCorner.CornerRadius = UDim.new(0, 8)
-    ErrorCorner.Parent = ErrorFrame
-
-    local ErrorStroke = Instance.new("UIStroke")
-    ErrorStroke.Color = Color3.fromRGB(255, 50, 50)
-    ErrorStroke.Thickness = 2
-    ErrorStroke.Parent = ErrorFrame
-
-    local ErrorTitle = Instance.new("TextLabel")
-    ErrorTitle.Size = UDim2.new(1, -40, 0, 35)
-    ErrorTitle.Position = UDim2.new(0, 15, 0, 5)
-    ErrorTitle.BackgroundTransparency = 1
-    ErrorTitle.Text = "Hệ Thống Thông Báo"
-    ErrorTitle.TextColor3 = Color3.fromRGB(255, 50, 50)
-    ErrorTitle.Font = Enum.Font.GothamBold
-    ErrorTitle.TextSize = 16
-    ErrorTitle.TextXAlignment = Enum.TextXAlignment.Left
-    ErrorTitle.Parent = ErrorFrame
-
-    local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-    CloseBtn.Position = UDim2.new(1, -35, 0, 5)
-    CloseBtn.BackgroundTransparency = 1
-    CloseBtn.Text = "✕"
-    CloseBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
-    CloseBtn.Font = Enum.Font.GothamBold
-    CloseBtn.TextSize = 18
-    CloseBtn.Parent = ErrorFrame
-
-    CloseBtn.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-    end)
-
-    local ErrorText = Instance.new("TextLabel")
-    ErrorText.Size = UDim2.new(1, -30, 0, 70)
-    ErrorText.Position = UDim2.new(0, 15, 0, 45)
-    ErrorText.BackgroundTransparency = 1
-    ErrorText.Text = "Bản hack không hỗ trợ game này!\nVui lòng vào đúng Skibidi Tower Defense."
-    ErrorText.TextColor3 = Color3.fromRGB(220, 220, 220)
-    ErrorText.Font = Enum.Font.Gotham
-    ErrorText.TextSize = 14
-    ErrorText.TextWrapped = true
-    ErrorText.TextXAlignment = Enum.TextXAlignment.Left
-    ErrorText.TextYAlignment = Enum.TextYAlignment.Top
-    ErrorText.Parent = ErrorFrame
-
-    return
-end
-
 local FILE_NAME = "Skibidi_Master_V3.json"
 local macroData = {
     spawnCommands = {},
@@ -563,4 +505,49 @@ ToggleButton.Name = "HubToggleButton"
 ToggleButton.Size = UDim2.new(0, 46, 0, 46)
 ToggleButton.Position = UDim2.new(0, 15, 0.5, -23)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
-Toggle
+ToggleButton.Text = "HUB"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 20, 147)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 12
+ToggleButton.DisplayOrder = 999999
+ToggleButton.Parent = ScreenGui
+
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 8)
+ButtonCorner.Parent = ToggleButton
+
+local ButtonStroke = Instance.new("UIStroke")
+ButtonStroke.Color = Color3.fromRGB(255, 20, 147)
+ButtonStroke.Thickness = 1.5
+ButtonStroke.Parent = ToggleButton
+
+ToggleButton.MouseButton1Click:Connect(function()
+    toggleMenu()
+end)
+
+local dragging, dragInput, dragStart, startPos
+ToggleButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = ToggleButton.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+ToggleButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        ToggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
