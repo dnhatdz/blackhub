@@ -16,6 +16,8 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GuiService = game:GetService("GuiService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -24,7 +26,8 @@ local macroData = {
     spawnCommands = {},
     autoUpgrade = false,
     autoAbility = false,
-    autoGacha = false, -- Thêm cấu hình Auto Gacha vào file save
+    autoGacha = false,
+    blackScreen = false,
     isRecording = false,
     isPlaying = false
 }
@@ -55,11 +58,30 @@ ScreenGui.Name = "DjtmestayHub_Gui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
+local BlackScreenFrame = Instance.new("Frame")
+BlackScreenFrame.Size = UDim2.new(1, 0, 1, 0)
+BlackScreenFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BlackScreenFrame.BorderSizePixel = 0
+BlackScreenFrame.ZIndex = 999999
+BlackScreenFrame.Visible = macroData.blackScreen
+BlackScreenFrame.Parent = ScreenGui
+
+local BlackScreenText = Instance.new("TextLabel")
+BlackScreenText.Size = UDim2.new(1, 0, 0, 50)
+BlackScreenText.Position = UDim2.new(0, 0, 0.5, -25)
+BlackScreenText.BackgroundTransparency = 1
+BlackScreenText.Text = "BLACK SCREEN ACTIVE\nTurn off in UI if needed"
+BlackScreenText.TextColor3 = Color3.fromRGB(255, 20, 147)
+BlackScreenText.Font = Enum.Font.SourceSansBold
+BlackScreenText.TextSize = 24
+BlackScreenText.Parent = BlackScreenFrame
+
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Size = UDim2.new(0, 300, 0, 300)
 LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
 LoadingFrame.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
 LoadingFrame.BorderSizePixel = 0
+LoadingFrame.ZIndex = 10
 LoadingFrame.Parent = ScreenGui
 
 local LoadingBorder = Instance.new("UIStroke")
@@ -87,6 +109,7 @@ MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
+MainFrame.ZIndex = 5
 MainFrame.Parent = ScreenGui
 
 local MainBorder = Instance.new("UIStroke")
@@ -273,7 +296,6 @@ task.spawn(function()
     end
 end)
 
--- Tạo các nút Toggle trong Tab Auto
 createToggle(AutoContainer, "Auto Nâng Cấp", macroData.autoUpgrade, function(state)
     macroData.autoUpgrade = state
     saveSettings()
@@ -284,13 +306,17 @@ createToggle(AutoContainer, "Auto Ability", macroData.autoAbility, function(stat
     saveSettings()
 end)
 
--- NÚT AUTO GACHA MỚI THÊM VÀO ĐÂY
 createToggle(AutoContainer, "Auto Gacha (Banner Open)", macroData.autoGacha, function(state)
     macroData.autoGacha = state
     saveSettings()
 end)
 
--- Vòng lặp luồng chạy ngầm xử lý Auto Upgrade và Auto Ability
+createToggle(AutoContainer, "Black Screen (Che màn hình)", macroData.blackScreen, function(state)
+    macroData.blackScreen = state
+    BlackScreenFrame.Visible = state
+    saveSettings()
+end)
+
 task.spawn(function()
     local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
@@ -314,11 +340,10 @@ task.spawn(function()
     end
 end)
 
--- VÒNG LẶP RIÊNG CHO AUTO GACHA (Chạy mỗi 2 giây)
 task.spawn(function()
     local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
-        task.wait(2) -- Trễ đúng 2 giây theo yêu cầu
+        task.wait(2)
         if clientServer and macroData.autoGacha then
             pcall(function()
                 clientServer.banner_open:InvokeServer()
@@ -359,7 +384,6 @@ task.spawn(function()
     end
 end)
 
-local UserInputService = game:GetService("UserInputService")
 local menuVisible = true
 local function toggleMenu()
     menuVisible = not menuVisible
@@ -367,12 +391,6 @@ local function toggleMenu()
     local targetPos = menuVisible and UDim2.new(0.5, -275, 0.5, -175) or UDim2.new(0.5, 0, 0.5, 0)
     TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize, Position = targetPos}):Play()
 end
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftControl then
-        toggleMenu()
-    end
-end)
 
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "HubToggleButton"
@@ -383,6 +401,7 @@ ToggleButton.Text = "HUB"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.TextSize = 14
+ToggleButton.ZIndex = 1000000
 ToggleButton.Parent = ScreenGui
 
 local ButtonCorner = Instance.new("UICorner")
