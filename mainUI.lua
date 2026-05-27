@@ -9,7 +9,6 @@ Title.Font = Enum.Font.GothamBold
 Title.Text = "Skibidi Master Tower Defense v2"
 Title.TextColor3 = Color3.fromRGB(255, 20, 147)
 Title.TextSize = 20
-Title.ZIndex = 5
 
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
@@ -62,7 +61,7 @@ local BlackScreenFrame = Instance.new("Frame")
 BlackScreenFrame.Size = UDim2.new(1, 0, 1, 0)
 BlackScreenFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 BlackScreenFrame.BorderSizePixel = 0
-BlackScreenFrame.ZIndex = 999999
+BlackScreenFrame.DisplayOrder = 999998
 BlackScreenFrame.Visible = macroData.blackScreen
 BlackScreenFrame.Parent = ScreenGui
 
@@ -81,7 +80,6 @@ LoadingFrame.Size = UDim2.new(0, 300, 0, 300)
 LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
 LoadingFrame.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
 LoadingFrame.BorderSizePixel = 0
-LoadingFrame.ZIndex = 10
 LoadingFrame.Parent = ScreenGui
 
 local LoadingBorder = Instance.new("UIStroke")
@@ -100,7 +98,6 @@ LoadingText.Text = "DjtmemayHUB\n-\nSkibidi Tower Defense\n\nLoading..."
 LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
 LoadingText.Font = Enum.Font.SourceSansBold
 LoadingText.TextSize = 22
-LoadingText.ZIndex = 11
 LoadingText.Parent = LoadingFrame
 task.wait(2)
 
@@ -110,7 +107,6 @@ MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
-MainFrame.ZIndex = 5
 MainFrame.Parent = ScreenGui
 
 local MainBorder = Instance.new("UIStroke")
@@ -137,7 +133,6 @@ LeftPanel.Size = UDim2.new(0, 130, 1, -45)
 LeftPanel.Position = UDim2.new(0, 0, 0, 45)
 LeftPanel.BackgroundColor3 = Color3.fromRGB(255, 192, 203)
 LeftPanel.BorderSizePixel = 0
-LeftPanel.ZIndex = 6
 LeftPanel.Parent = MainFrame
 
 local LeftCorner = Instance.new("UICorner")
@@ -153,7 +148,6 @@ RightPanel.CanvasSize = UDim2.new(0, 0, 0, 450)
 RightPanel.ScrollBarThickness = 4
 RightPanel.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
 RightPanel.ElasticBehavior = Enum.ElasticBehavior.Always
-RightPanel.ZIndex = 6
 RightPanel.Parent = MainFrame
 
 local UIListLayout = Instance.new("UIListLayout")
@@ -165,7 +159,6 @@ local FarmContainer = Instance.new("Frame")
 FarmContainer.Size = UDim2.new(1, 0, 1, 0)
 FarmContainer.BackgroundTransparency = 1
 FarmContainer.Visible = true
-FarmContainer.ZIndex = 7
 FarmContainer.Parent = RightPanel
 
 local FarmLayout = Instance.new("UIListLayout")
@@ -176,7 +169,6 @@ local AutoContainer = Instance.new("Frame")
 AutoContainer.Size = UDim2.new(1, 0, 1, 0)
 AutoContainer.BackgroundTransparency = 1
 AutoContainer.Visible = false
-AutoContainer.ZIndex = 7
 AutoContainer.Parent = RightPanel
 
 local AutoLayout = Instance.new("UIListLayout")
@@ -192,7 +184,6 @@ local function createMenuButton(text, posIndex, targetContainer)
     btn.TextColor3 = Color3.fromRGB(255, 20, 147)
     btn.Font = Enum.Font.SourceSansBold
     btn.TextSize = 18
-    btn.ZIndex = 7
     btn.Parent = LeftPanel
     
     local btnCorner = Instance.new("UICorner")
@@ -214,7 +205,6 @@ local function createToggle(parent, text, defaultState, callback)
     local toggleFrame = Instance.new("Frame")
     toggleFrame.Size = UDim2.new(0.95, 0, 0, 40)
     toggleFrame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
-    toggleFrame.ZIndex = parent.ZIndex
     toggleFrame.Parent = parent
     
     local tfCorner = Instance.new("UICorner")
@@ -230,7 +220,6 @@ local function createToggle(parent, text, defaultState, callback)
     label.Font = Enum.Font.SourceSansBold
     label.TextSize = 16
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.ZIndex = parent.ZIndex + 1
     label.Parent = toggleFrame
     
     local btn = Instance.new("TextButton")
@@ -241,7 +230,6 @@ local function createToggle(parent, text, defaultState, callback)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.SourceSansBold
     btn.TextSize = 14
-    btn.ZIndex = parent.ZIndex + 1
     btn.Parent = toggleFrame
     
     local btnCorner = Instance.new("UICorner")
@@ -255,6 +243,14 @@ local function createToggle(parent, text, defaultState, callback)
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = state and Color3.fromRGB(255, 105, 180) or Color3.fromRGB(200, 200, 200)}):Play()
         callback(state)
     end)
+end
+
+local function cframeToTable(cf)
+    return {cf:GetComponents()}
+end
+
+local function tableToCFrame(tbl)
+    return CFrame.new(unpack(tbl))
 end
 
 local oldNamecall
@@ -402,7 +398,7 @@ ToggleButton.Text = "HUB"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.TextSize = 14
-ToggleButton.ZIndex = 1000000
+ToggleButton.DisplayOrder = 999999
 ToggleButton.Parent = ScreenGui
 
 local ButtonCorner = Instance.new("UICorner")
