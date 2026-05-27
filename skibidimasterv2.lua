@@ -311,27 +311,6 @@ local Players = game:GetService("Players")
 local GuiService = game:GetService("GuiService")
 local LocalPlayer = Players.LocalPlayer
 
-local REJOIN_INTERVAL = 3600
-local REJOIN_DELAY = 5
-
-local function doTeleport()
-    task.wait(REJOIN_DELAY)
-    if game.JobId ~= "" then
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
-    else
-        TeleportService:Teleport(game.PlaceId, LocalPlayer)
-    end
-end
-
-task.spawn(function()
-    task.wait(REJOIN_INTERVAL)
-    doTeleport()
-end)
-
-GuiService.ErrorMessageChanged:Connect(function()
-    doTeleport()
-end)
-
 task.spawn(function()
     while true do
         task.wait(10)
