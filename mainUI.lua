@@ -25,8 +25,7 @@ local macroData = {
     autoUpgrade = false,
     autoAbility = false,
     isRecording = false,
-    isPlaying = false,
-    blackScreen = false -- Lưu trạng thái màn hình đen
+    isPlaying = false
 }
 
 local function saveSettings()
@@ -54,71 +53,6 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DjtmestayHub_Gui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
-
--- ========================================================
--- CODE SỬA ĐỔI: KHUNG MÀN HÌNH ĐEN & NÚT TẮT KHẨN CẤP
--- ========================================================
-local BlackScreenFrame = Instance.new("Frame")
-BlackScreenFrame.Name = "BlackScreenFrame"
-BlackScreenFrame.Size = UDim2.new(1, 0, 1, 50)
-BlackScreenFrame.Position = UDim2.new(0, 0, 0, -50)
-BlackScreenFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-BlackScreenFrame.BorderSizePixel = 0
-BlackScreenFrame.ZIndex = 9999 -- Hạ xuống một chút để Menu chính có thể đè lên
-BlackScreenFrame.Visible = macroData.blackScreen
-local RunService = game:GetService("RunService")
-BlackScreenFrame.Parent = ScreenGui
-
-local BlackScreenText = Instance.new("TextLabel")
-BlackScreenText.Size = UDim2.new(1, 0, 0, 50)
-BlackScreenText.Position = UDim2.new(0, 0, 0.4, -25)
-BlackScreenText.BackgroundTransparency = 1
-BlackScreenText.Text = "BLACK SCREEN ACTIVE\n(Đang treo máy giảm lag...)"
-BlackScreenText.TextColor3 = Color3.fromRGB(255, 255, 255)
-BlackScreenText.Font = Enum.Font.SourceSansBold
-BlackScreenText.TextSize = 24
-BlackScreenText.Parent = BlackScreenFrame
-
--- NÚT BẤM TẮT KHẨN CẤP TRÊN MÀN HÌNH ĐEN
-local EmergencyCloseBtn = Instance.new("TextButton")
-EmergencyCloseBtn.Name = "EmergencyCloseBtn"
-EmergencyCloseBtn.Size = UDim2.new(0, 180, 0, 40)
-EmergencyCloseBtn.Position = UDim2.new(0.5, -90, 0.5, 30)
-EmergencyCloseBtn.BackgroundColor3 = Color3.fromRGB(220, 53, 69)
-EmergencyCloseBtn.Text = "TẮT MÀN HÌNH ĐEN"
-EmergencyCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-EmergencyCloseBtn.Font = Enum.Font.SourceSansBold
-EmergencyCloseBtn.TextSize = 16
-EmergencyCloseBtn.Parent = BlackScreenFrame
-
-local EmergencyCorner = Instance.new("UICorner")
-EmergencyCorner.CornerRadius = UDim.new(0, 8)
-EmergencyCorner.Parent = EmergencyCloseBtn
-
--- Hàm cập nhật trạng thái hiển thị của Nút gạt trong Menu để đồng bộ
-local updateToggleUI = nil 
-
--- Hàm bật tắt Black Screen
-local function toggleBlackScreen(state)
-    macroData.blackScreen = state
-    BlackScreenFrame.Visible = state
-    
-    if state then
-        RunService:Set3dRenderingEnabled(false) -- Tắt render 3D để mát máy
-    else
-        RunService:Set3dRenderingEnabled(true) -- Bật lại render 3D
-    end
-    
-    if updateToggleUI then
-        updateToggleUI(state)
-    end
-end
-
-EmergencyCloseBtn.MouseButton1Click:Connect(function()
-    toggleBlackScreen(false)
-    saveSettings()
-end)
--- ========================================================
 
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Size = UDim2.new(0, 300, 0, 300)
@@ -152,7 +86,6 @@ MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
-MainFrame.ZIndex = 10000 -- Đảm bảo đè lên trên màn hình đen nếu mở bằng Ctrl
 MainFrame.Parent = ScreenGui
 
 local MainBorder = Instance.new("UIStroke")
@@ -289,15 +222,7 @@ local function createToggle(parent, text, defaultState, callback)
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = state and Color3.fromRGB(255, 105, 180) or Color3.fromRGB(200, 200, 200)}):Play()
         callback(state)
     end)
-    
-    -- Trả về một hàm nhỏ giúp đồng bộ giao diện nút từ bên ngoài nếu cần
-    local function setVisualState(newState)
-        state = newState
-        btn.Text = state and "ON" or "OFF"
-        btn.BackgroundColor3 = state and Color3.fromRGB(255, 105, 180) or Color3.fromRGB(200, 200, 200)
-    end
-    
-    return toggleFrame, setVisualState
+    return toggleFrame
 end
 
 local function cframeToTable(cf)
@@ -356,19 +281,6 @@ end)
 createToggle(AutoContainer, "Auto Ability", macroData.autoAbility, function(state)
     macroData.autoAbility = state
     saveSettings()
-end)
-
--- Nhận hàm cập nhật giao diện nút gạt từ hàm createToggle
-local blackScreenToggleFrame, visualUpdater = createToggle(AutoContainer, "Màn hình đen (Black Screen)", macroData.blackScreen, function(state)
-    saveSettings()
-    toggleBlackScreen(state)
-end)
-updateToggleUI = visualUpdater
-
--- Khởi động lại trạng thái cũ khi load script xong
-task.spawn(function()
-    task.wait(0.5)
-    toggleBlackScreen(macroData.blackScreen)
 end)
 
 task.spawn(function()
@@ -449,7 +361,6 @@ ToggleButton.Text = "HUB"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.TextSize = 14
-ToggleButton.ZIndex = 10001 -- Đặt nút HUB nằm trên cùng để luôn bật lại menu được
 ToggleButton.Parent = ScreenGui
 
 local ButtonCorner = Instance.new("UICorner")
