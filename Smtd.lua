@@ -402,20 +402,20 @@ end)
 -- SỬA LỖI AUTO UPGRADE VÀ AUTO ABILITY KHÔNG HOẠT ĐỘNG SAU REJOIN
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(0.2)
         local remotes = ReplicatedStorage:FindFirstChild("Remotes")
         local clientServer = remotes and remotes:FindFirstChild("client_server")
         
         if clientServer then
             if macroData.autoUpgrade and clientServer:FindFirstChild("unit_upgrade_auto") then
-                for i = 1, 100 do
+                for i = 1, 200 do
                     pcall(function()
                         clientServer.unit_upgrade_auto:InvokeServer(tostring(i))
                     end)
                 end
             end
             if macroData.autoAbility and clientServer:FindFirstChild("unit_ability_auto") then
-                for i = 1, 100 do
+                for i = 1, 200 do
                     pcall(function()
                         clientServer.unit_ability_auto:InvokeServer(tostring(i))
                     end)
