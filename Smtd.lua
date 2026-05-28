@@ -16,6 +16,7 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -26,8 +27,10 @@ local macroData = {
     autoAbility = false,
     isRecording = false,
     isPlaying = false,
-    blackScreen = false -- Lưu trạng thái màn hình đen
+    blackScreen = false
 }
+
+local toggleButtons = {} -- Bảng lưu trữ để đồng bộ nút bấm
 
 local function saveSettings()
     if writefile then
@@ -56,22 +59,21 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
 -- ========================================================
--- CODE THÊM MỚI: TẠO KHUNG MÀN HÌNH ĐEN (BLACK SCREEN UI)
+-- PHẦN CẢI TIẾN: BLACK SCREEN UI (THÊM LOADING VÀ NÚT X TẮT)
 -- ========================================================
 local BlackScreenFrame = Instance.new("Frame")
 BlackScreenFrame.Name = "BlackScreenFrame"
-BlackScreenFrame.Size = UDim2.new(1, 0, 1, 50) -- Phủ toàn màn hình bao gồm cả topbar
+BlackScreenFrame.Size = UDim2.new(1, 0, 1, 50)
 BlackScreenFrame.Position = UDim2.new(0, 0, 0, -50)
 BlackScreenFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 BlackScreenFrame.BorderSizePixel = 0
-BlackScreenFrame.ZIndex = 999999 -- Luôn luôn nằm trên cùng
+BlackScreenFrame.ZIndex = 999999
 BlackScreenFrame.Visible = macroData.blackScreen
-local RunService = game:GetService("RunService")
 BlackScreenFrame.Parent = ScreenGui
 
 local BlackScreenText = Instance.new("TextLabel")
-BlackScreenText.Size = UDim2.new(1, 0, 0, 50)
-BlackScreenText.Position = UDim2.new(0, 0, 0.5, -25)
+BlackScreenText.Size = UDim2.new(1, 0, 0, 40)
+BlackScreenText.Position = UDim2.new(0, 0, 0.5, -40)
 BlackScreenText.BackgroundTransparency = 1
 BlackScreenText.Text = "BLACK SCREEN ACTIVE\n(Đang treo máy giảm lag...)"
 BlackScreenText.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -79,19 +81,80 @@ BlackScreenText.Font = Enum.Font.SourceSansBold
 BlackScreenText.TextSize = 24
 BlackScreenText.Parent = BlackScreenFrame
 
--- Hàm bật tắt Black Screen để tối ưu CPU/GPU khi AFK
-local function toggleBlackScreen(state)
+-- Chữ Loading hiệu ứng nhấp nháy dưới màn hình đen
+local BlackScreenLoading = Instance.new("TextLabel")
+BlackScreenLoading.Size = UDim2.new(1, 0, 0, 30)
+BlackScreenLoading.Position = UDim2.new(0, 0, 0.5, 20)
+BlackScreenLoading.BackgroundTransparency = 1
+BlackScreenLoading.Text = "LOADING..."
+BlackScreenLoading.TextColor3 = Color3.fromRGB(255, 20, 147)
+BlackScreenLoading.Font = Enum.Font.SourceSansItalic
+BlackScreenLoading.TextSize = 18
+BlackScreenLoading.Parent = BlackScreenFrame
+
+task.spawn(function()
+    while true do
+        if BlackScreenFrame.Visible then
+            TweenService:Create(BlackScreenLoading, TweenInfo.new(0.6), {TextTransparency = 0.3}):Play()
+            task.wait(0.6)
+            TweenService:Create(BlackScreenLoading, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+            task.wait(0.6)
+        else
+            task.wait(1)
+        end
+    end
+end)
+
+-- Nút dấu X màu đỏ để tắt nhanh màn hình đen
+local CloseBlackScreenBtn = Instance.new("TextButton")
+CloseBlackScreenBtn.Size = UDim2.new(0, 40, 0, 40)
+CloseBlackScreenBtn.Position = UDim2.new(1, -50, 0, 60) -- Để không bị đè bởi Topbar mặc định
+CloseBlackScreenBtn.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
+CloseBlackScreenBtn.Text = "X"
+CloseBlackScreenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBlackScreenBtn.Font = Enum.Font.SourceSansBold
+CloseBlackScreenBtn.TextSize = 22
+CloseBlackScreenBtn.ZIndex = 1000000
+CloseBlackScreenBtn.Parent = BlackScreenFrame
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseBlackScreenBtn
+
+-- Khai báo hàm trước để sử dụng chéo
+local toggleBlackScreen
+
+-- Cập nhật đồng bộ giao diện nút bấm trong Hub
+local function updateToggleButtonUI(configKey, state)
+    local btn = toggleButtons[configKey]
+    if btn then
+        btn.Text = state and "ON" or "OFF"
+        TweenService:Create(btn, TweenInfo.new(0.2), {
+            BackgroundColor3 = state and Color3.fromRGB(255, 105, 180) or Color3.fromRGB(200, 200, 200)
+        }):Play()
+    end
+end
+
+toggleBlackScreen = function(state)
     macroData.blackScreen = state
     BlackScreenFrame.Visible = state
     
-    -- Tối ưu hóa FPS khi bật Black Screen (Nếu script injector của bạn hỗ trợ thay đổi cấu hình đồ họa hoặc khóa FPS)
-    if state then
-        -- Giảm bớt tải xử lý đồ họa của Roblox 
-        RunService:Set3dRenderingEnabled(false) -- Tắt render 3D hoàn toàn để giải phóng GPU/Card đồ họa (Cực mát máy)
-    else
-        RunService:Set3dRenderingEnabled(true) -- Bật lại render 3D khi tắt màn hình đen
-    end
+    -- Đồng bộ trạng thái với nút bấm trong menu UI
+    updateToggleButtonUI("blackScreen", state)
+    
+    pcall(function()
+        if state then
+            RunService:Set3dRenderingEnabled(false) -- Tắt render 3D để giảm tải CPU/GPU
+        else
+            RunService:Set3dRenderingEnabled(true) -- Bật lại render 3D
+        end
+    end)
 end
+
+CloseBlackScreenBtn.MouseButton1Click:Connect(function()
+    toggleBlackScreen(false)
+    saveSettings()
+end)
 -- ========================================================
 
 local LoadingFrame = Instance.new("Frame")
@@ -220,7 +283,7 @@ end
 local FarmTabBtn = createMenuButton("Farm", 0, FarmContainer)
 local AutoTabBtn = createMenuButton("Auto", 1, AutoContainer)
 
-local function createToggle(parent, text, defaultState, callback)
+local function createToggle(parent, configKey, text, defaultState, callback)
     local toggleFrame = Instance.new("Frame")
     toggleFrame.Size = UDim2.new(0.95, 0, 0, 40)
     toggleFrame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
@@ -255,9 +318,11 @@ local function createToggle(parent, text, defaultState, callback)
     btnCorner.CornerRadius = UDim.new(0, 13)
     btnCorner.Parent = btn
     
-    local state = defaultState
+    toggleButtons[configKey] = btn -- Lưu tham chiếu nút để cập nhật từ xa
+    
     btn.MouseButton1Click:Connect(function()
-        state = not state
+        macroData[configKey] = not macroData[configKey]
+        local state = macroData[configKey]
         btn.Text = state and "ON" or "OFF"
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = state and Color3.fromRGB(255, 105, 180) or Color3.fromRGB(200, 200, 200)}):Play()
         callback(state)
@@ -286,68 +351,70 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     return oldNamecall(self, ...)
 end)
 
-createToggle(FarmContainer, "Ghi lại hành động (Record)", macroData.isRecording, function(state)
-    macroData.isRecording = state
+createToggle(FarmContainer, "isRecording", "Ghi lại hành động (Record)", macroData.isRecording, function(state)
     if state then
         macroData.spawnCommands = {}
     end
     saveSettings()
 end)
 
-createToggle(FarmContainer, "Bắt đầu phát Macro (Play)", macroData.isPlaying, function(state)
-    macroData.isPlaying = state
+createToggle(FarmContainer, "isPlaying", "Bắt đầu phát Macro (Play)", macroData.isPlaying, function(state)
     saveSettings()
 end)
 
+-- SỬA VÒNG LẶP PLAY MACRO SAU REJOIN
 task.spawn(function()
-    local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
         task.wait(2)
-        if macroData.isPlaying and #macroData.spawnCommands > 0 and clientServer then
-            for _, command in ipairs(macroData.spawnCommands) do
-                pcall(function()
-                    clientServer.unit_spawn:InvokeServer(command.unitId, tableToCFrame(command.cframe))
-                end)
+        if macroData.isPlaying and #macroData.spawnCommands > 0 then
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            local clientServer = remotes and remotes:FindFirstChild("client_server")
+            if clientServer and clientServer:FindFirstChild("unit_spawn") then
+                for _, command in ipairs(macroData.spawnCommands) do
+                    pcall(function()
+                        clientServer.unit_spawn:InvokeServer(command.unitId, tableToCFrame(command.cframe))
+                    end)
+                end
             end
         end
     end
 end)
 
-createToggle(AutoContainer, "Auto Nâng Cấp", macroData.autoUpgrade, function(state)
-    macroData.autoUpgrade = state
+createToggle(AutoContainer, "autoUpgrade", "Auto Nâng Cấp", macroData.autoUpgrade, function(state)
     saveSettings()
 end)
 
-createToggle(AutoContainer, "Auto Ability", macroData.autoAbility, function(state)
-    macroData.autoAbility = state
+createToggle(AutoContainer, "autoAbility", "Auto Ability", macroData.autoAbility, function(state)
     saveSettings()
 end)
 
--- Tạo nút Toggle cho tính năng Màn hình đen giảm lag trong Tab Auto
-createToggle(AutoContainer, "Màn hình đen (Black Screen)", macroData.blackScreen, function(state)
+createToggle(AutoContainer, "blackScreen", "Màn hình đen (Black Screen)", macroData.blackScreen, function(state)
     saveSettings()
     toggleBlackScreen(state)
 end)
 
--- Khởi động lại trạng thái cũ khi load script xong
+-- KHỞI ĐỘNG LẠI TRẠNG THÁI MÀN HÌNH ĐEN KHI LOAD XONG SCRIPT
 task.spawn(function()
     task.wait(0.5)
     toggleBlackScreen(macroData.blackScreen)
 end)
 
+-- SỬA LỖI AUTO UPGRADE VÀ AUTO ABILITY KHÔNG HOẠT ĐỘNG SAU REJOIN
 task.spawn(function()
-    local clientServer = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("client_server", 5)
     while true do
         task.wait(1)
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        local clientServer = remotes and remotes:FindFirstChild("client_server")
+        
         if clientServer then
-            if macroData.autoUpgrade then
+            if macroData.autoUpgrade and clientServer:FindFirstChild("unit_upgrade_auto") then
                 for i = 1, 100 do
                     pcall(function()
                         clientServer.unit_upgrade_auto:InvokeServer(tostring(i))
                     end)
                 end
             end
-            if macroData.autoAbility then
+            if macroData.autoAbility and clientServer:FindFirstChild("unit_ability_auto") then
                 for i = 1, 100 do
                     pcall(function()
                         clientServer.unit_ability_auto:InvokeServer(tostring(i))
@@ -364,7 +431,10 @@ task.spawn(function()
     while true do
         task.wait(10)
         pcall(function()
-            game:GetService("ReplicatedStorage").Remotes.client_server.teleport_replay:InvokeServer()
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            if remotes and remotes.client_server and remotes.client_server:FindFirstChild("teleport_replay") then
+                remotes.client_server.teleport_replay:InvokeServer()
+            end
         end)
     end
 end)
