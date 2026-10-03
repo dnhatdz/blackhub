@@ -5,31 +5,30 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local GuiService = game:GetService("GuiService")
 local HapticService = game:GetService("HapticService")
 
 local LOCAL_PLAYER = Players.LocalPlayer
 
 local CONFIG = {
 	Accent = Color3.fromRGB(10, 132, 255),
-	BaseColor = Color3.fromRGB(28, 28, 30),
-	GroupedBg = Color3.fromRGB(0, 0, 0),
-	RowBg = Color3.fromRGB(44, 44, 46),
-	Separator = Color3.fromRGB(56, 56, 58),
+	GlassTint = Color3.fromRGB(255, 255, 255),
+	GlassTransparency = 0.94,
+	GlassTint2 = Color3.fromRGB(180, 200, 230),
 	Label = Color3.fromRGB(255, 255, 255),
-	SecondaryLabel = Color3.fromRGB(142, 142, 147),
+	SecondaryLabel = Color3.fromRGB(180, 190, 210),
+	Separator = Color3.fromRGB(255, 255, 255),
 	Green = Color3.fromRGB(48, 209, 88),
 	Red = Color3.fromRGB(255, 69, 58),
 	Orange = Color3.fromRGB(255, 159, 10),
-	TrackOff = Color3.fromRGB(57, 57, 61),
-	CornerRadius = 14,
-	RowRadius = 10,
+	Blue = Color3.fromRGB(10, 132, 255),
+	TrackOff = Color3.fromRGB(255, 255, 255),
+	CornerRadius = 18,
+	RowRadius = 14,
 	Font = Enum.Font.GothamMedium,
 	FontBold = Enum.Font.GothamBold,
 	Noise = "rbxassetid://243098098",
 	Shadow = "rbxassetid://8992230677",
-	Squircle = "rbxassetid://89641024074289",
-	SquircleGlass = "rbxassetid://131126436897551",
+	GlassMask = "rbxassetid://5028857084",
 }
 
 local function newInstance(class, props)
@@ -77,6 +76,69 @@ local function hapticSmall()
 	end)
 end
 
+local function makeGlassRow(parent, height)
+	local row = newInstance("Frame", {
+		BackgroundColor3 = CONFIG.GlassTint,
+		BackgroundTransparency = 0.94,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0, 0, height),
+		ZIndex = 10,
+		Parent = parent,
+	})
+	newInstance("UICorner", {
+		CornerRadius = UDim.new(0, CONFIG.RowRadius),
+		Parent = row,
+	})
+
+	local grad = newInstance("Frame", {
+		BackgroundColor3 = CONFIG.GlassTint2,
+		BackgroundTransparency = 0.9,
+		BorderSizePixel = 0,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 10,
+		Parent = row,
+	})
+	newInstance("UICorner", {
+		CornerRadius = UDim.new(0, CONFIG.RowRadius),
+		Parent = grad,
+	})
+	newInstance("UIGradient", {
+		Rotation = 135,
+		Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.6),
+			NumberSequenceKeypoint.new(0.5, 0.95),
+			NumberSequenceKeypoint.new(1, 0.6),
+		}),
+		Parent = grad,
+	})
+
+	local stroke = newInstance("UIStroke", {
+		Color = Color3.fromRGB(255, 255, 255),
+		Thickness = 1,
+		Transparency = 0.85,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Parent = row,
+	})
+
+	local noise = newInstance("ImageLabel", {
+		BackgroundTransparency = 1,
+		Image = CONFIG.Noise,
+		ImageColor3 = Color3.fromRGB(255, 255, 255),
+		ImageTransparency = 0.96,
+		ScaleType = Enum.ScaleType.Tile,
+		TileSize = UDim2.fromOffset(128, 128),
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 10,
+		Parent = row,
+	})
+	newInstance("UICorner", {
+		CornerRadius = UDim.new(0, CONFIG.RowRadius),
+		Parent = noise,
+	})
+
+	return row, stroke, grad
+end
+
 function LiquidGlass.new(opts)
 	local self = setmetatable({}, LiquidGlass)
 	opts = opts or {}
@@ -86,11 +148,9 @@ function LiquidGlass.new(opts)
 	self._alive = true
 	self._open = false
 	self._dragging = false
-	self._fullscreen = false
 
 	self.Title = opts.Title or "Settings"
 	self.Author = opts.Author or ""
-	self.Icon = opts.Icon
 	self.Size = opts.Size or UDim2.fromOffset(420, 520)
 	self.Position = opts.Position or UDim2.fromScale(0.5, 0.5)
 	self.ToggleKey = opts.ToggleKey or Enum.KeyCode.RightShift
@@ -146,7 +206,7 @@ function LiquidGlass:_build()
 		BackgroundTransparency = 1,
 		Image = CONFIG.Shadow,
 		ImageColor3 = Color3.fromRGB(0, 0, 0),
-		ImageTransparency = 0.5,
+		ImageTransparency = 1,
 		ScaleType = Enum.ScaleType.Slice,
 		SliceCenter = Rect.new(99, 99, 99, 99),
 		Size = UDim2.new(1, 80, 1, 80),
@@ -157,7 +217,7 @@ function LiquidGlass:_build()
 
 	self.Panel = newInstance("Frame", {
 		Name = "Panel",
-		BackgroundColor3 = CONFIG.BaseColor,
+		BackgroundColor3 = CONFIG.GlassTint,
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
@@ -172,7 +232,7 @@ function LiquidGlass:_build()
 
 	self.GlassLayer = newInstance("Frame", {
 		Name = "GlassLayer",
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundColor3 = CONFIG.GlassTint,
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
@@ -186,11 +246,34 @@ function LiquidGlass:_build()
 	newInstance("UIGradient", {
 		Rotation = 135,
 		Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.6),
+			NumberSequenceKeypoint.new(0, 0.55),
 			NumberSequenceKeypoint.new(0.5, 0.92),
-			NumberSequenceKeypoint.new(1, 0.6),
+			NumberSequenceKeypoint.new(1, 0.55),
 		}),
 		Parent = self.GlassLayer,
+	})
+
+	self.GlassTintLayer = newInstance("Frame", {
+		Name = "GlassTint",
+		BackgroundColor3 = CONFIG.GlassTint2,
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 4,
+		Parent = self.Panel,
+	})
+	newInstance("UICorner", {
+		CornerRadius = UDim.new(0, 24),
+		Parent = self.GlassTintLayer,
+	})
+	newInstance("UIGradient", {
+		Rotation = 45,
+		Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.85),
+			NumberSequenceKeypoint.new(0.5, 0.98),
+			NumberSequenceKeypoint.new(1, 0.85),
+		}),
+		Parent = self.GlassTintLayer,
 	})
 
 	self.Noise = newInstance("ImageLabel", {
@@ -202,7 +285,7 @@ function LiquidGlass:_build()
 		ScaleType = Enum.ScaleType.Tile,
 		TileSize = UDim2.fromOffset(128, 128),
 		Size = UDim2.fromScale(1, 1),
-		ZIndex = 4,
+		ZIndex = 5,
 		Parent = self.Panel,
 	})
 	newInstance("UICorner", {
@@ -215,8 +298,8 @@ function LiquidGlass:_build()
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Size = UDim2.new(1, 0, 0.4, 0),
-		ZIndex = 5,
+		Size = UDim2.new(1, 0, 0.35, 0),
+		ZIndex = 6,
 		Parent = self.Panel,
 	})
 	newInstance("UICorner", {
@@ -226,7 +309,7 @@ function LiquidGlass:_build()
 	newInstance("UIGradient", {
 		Rotation = 90,
 		Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.75),
+			NumberSequenceKeypoint.new(0, 0.82),
 			NumberSequenceKeypoint.new(1, 1),
 		}),
 		Parent = self.Specular,
@@ -248,7 +331,7 @@ function LiquidGlass:_build()
 		Parent = self.Panel,
 	})
 
-	self.TitleLabel = newInstance("TextLabel", {
+	newInstance("TextLabel", {
 		BackgroundTransparency = 1,
 		Text = self.Title,
 		Font = CONFIG.FontBold,
@@ -278,7 +361,7 @@ function LiquidGlass:_build()
 
 	local closeBtn = newInstance("TextButton", {
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		BackgroundTransparency = 0.85,
+		BackgroundTransparency = 0.88,
 		BorderSizePixel = 0,
 		Text = "×",
 		Font = CONFIG.FontBold,
@@ -300,8 +383,8 @@ function LiquidGlass:_build()
 
 	self.TabBar = newInstance("Frame", {
 		Name = "TabBar",
-		BackgroundColor3 = Color3.fromRGB(118, 118, 128),
-		BackgroundTransparency = 0.88,
+		BackgroundColor3 = CONFIG.GlassTint,
+		BackgroundTransparency = 0.92,
 		BorderSizePixel = 0,
 		Size = UDim2.new(1, -48, 0, 32),
 		Position = UDim2.fromOffset(24, 66),
@@ -312,10 +395,17 @@ function LiquidGlass:_build()
 		CornerRadius = UDim.new(0, 9),
 		Parent = self.TabBar,
 	})
+	newInstance("UIStroke", {
+		Color = Color3.fromRGB(255, 255, 255),
+		Thickness = 1,
+		Transparency = 0.9,
+		Parent = self.TabBar,
+	})
 
 	self.TabIndicator = newInstance("Frame", {
 		Name = "Indicator",
-		BackgroundColor3 = Color3.fromRGB(99, 99, 102),
+		BackgroundColor3 = CONFIG.GlassTint,
+		BackgroundTransparency = 0.78,
 		BorderSizePixel = 0,
 		Size = UDim2.new(0, 0, 1, -4),
 		Position = UDim2.fromOffset(2, 2),
@@ -337,39 +427,13 @@ function LiquidGlass:_build()
 		ZIndex = 10,
 		Parent = self.Panel,
 	})
-
-	self.ContentScroll = newInstance("ScrollingFrame", {
-		Name = "Scroll",
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Size = UDim2.fromScale(1, 1),
-		ScrollBarThickness = 2,
-		ScrollBarImageColor3 = CONFIG.SecondaryLabel,
-		ScrollBarImageTransparency = 0.5,
-		CanvasSize = UDim2.new(),
-		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		ScrollingDirection = Enum.ScrollingDirection.Y,
-		ElasticBehavior = Enum.ElasticBehavior.WhenScrollable,
-		ZIndex = 10,
-		Parent = self.Content,
-	})
-	newInstance("UIListLayout", {
-		Padding = UDim.new(0, 8),
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Parent = self.ContentScroll,
-	})
-	newInstance("UIPadding", {
-		PaddingRight = UDim.new(0, 6),
-		PaddingBottom = UDim.new(0, 20),
-		Parent = self.ContentScroll,
-	})
 end
 
 function LiquidGlass:_buildMobileButton()
 	local btn = newInstance("TextButton", {
 		Name = "MobileToggle",
-		BackgroundColor3 = Color3.fromRGB(28, 28, 30),
-		BackgroundTransparency = 0.15,
+		BackgroundColor3 = CONFIG.GlassTint,
+		BackgroundTransparency = 0.75,
 		BorderSizePixel = 0,
 		Text = "",
 		Size = UDim2.fromOffset(52, 52),
@@ -385,11 +449,27 @@ function LiquidGlass:_buildMobileButton()
 	newInstance("UIStroke", {
 		Color = Color3.fromRGB(255, 255, 255),
 		Thickness = 1,
-		Transparency = 0.65,
+		Transparency = 0.6,
 		Parent = btn,
 	})
 
-	local icon = newInstance("TextLabel", {
+	local noise = newInstance("ImageLabel", {
+		BackgroundTransparency = 1,
+		Image = CONFIG.Noise,
+		ImageColor3 = Color3.fromRGB(255, 255, 255),
+		ImageTransparency = 0.94,
+		ScaleType = Enum.ScaleType.Tile,
+		TileSize = UDim2.fromOffset(64, 64),
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 99,
+		Parent = btn,
+	})
+	newInstance("UICorner", {
+		CornerRadius = UDim.new(1, 0),
+		Parent = noise,
+	})
+
+	newInstance("TextLabel", {
 		BackgroundTransparency = 1,
 		Text = "☰",
 		Font = CONFIG.FontBold,
@@ -449,8 +529,6 @@ function LiquidGlass:_buildMobileButton()
 			end
 		end
 	end))
-
-	self.MobileToggleBtn = btn
 end
 
 function LiquidGlass:_startLoop()
@@ -472,13 +550,14 @@ function LiquidGlass:_startLoop()
 			self.Size.Y.Offset * s
 		)
 
-		self.Panel.BackgroundTransparency = 1 - 0.15 * a
+		self.Panel.BackgroundTransparency = 1 - 0.95 * a
 		self.GlassLayer.BackgroundTransparency = 1 - 0.92 * a
+		self.GlassTintLayer.BackgroundTransparency = 1 - 0.95 * a
 		self.Noise.ImageTransparency = 1 - 0.06 * a
-		self.Specular.BackgroundTransparency = 1 - 0.75 * a
-		self.Edge.Transparency = 1 - 0.55 * a
-		self.Shadow.ImageTransparency = 1 - 0.5 * a
-		self.Backdrop.BackgroundTransparency = 1 - 0.5 * b
+		self.Specular.BackgroundTransparency = 1 - 0.82 * a
+		self.Edge.Transparency = 1 - 0.7 * a
+		self.Shadow.ImageTransparency = 1 - 0.55 * a
+		self.Backdrop.BackgroundTransparency = 1 - 0.45 * b
 
 		for _, entry in ipairs(self._springs) do
 			local v = entry.spring:Update(dt)
@@ -530,36 +609,19 @@ function LiquidGlass:_bindInput()
 	end))
 end
 
-function LiquidGlass:_makeRow(height)
-	local row = newInstance("Frame", {
-		BackgroundColor3 = CONFIG.RowBg,
-		BackgroundTransparency = 0.05,
-		BorderSizePixel = 0,
-		Size = UDim2.new(1, 0, 0, height),
-		ZIndex = 10,
-		Parent = self.ContentScroll,
-	})
-	newInstance("UICorner", {
-		CornerRadius = UDim.new(0, CONFIG.RowRadius),
-		Parent = row,
-	})
-	return row
-end
-
 function LiquidGlass:Tab(name)
 	local tab = {}
 	tab.Name = name
 
 	local tabCount = #self._tabs + 1
-	local tabWidthScale = 1
 
 	local tabBtn = newInstance("TextButton", {
 		BackgroundTransparency = 1,
 		Text = name,
 		Font = CONFIG.Font,
 		TextSize = 13,
-		TextColor3 = CONFIG.SecondaryLabel,
-		Size = UDim2.new(tabWidthScale / tabCount, 0, 1, 0),
+		TextColor3 = Color3.fromRGB(180, 190, 210),
+		Size = UDim2.new(1 / tabCount, 0, 1, 0),
 		Position = UDim2.new((tabCount - 1) / tabCount, 0, 0, 0),
 		AutoButtonColor = false,
 		ZIndex = 12,
@@ -599,7 +661,7 @@ function LiquidGlass:Tab(name)
 
 	if #self._tabs == 1 then
 		scroll.Visible = true
-		tabBtn.TextColor3 = CONFIG.Label
+		tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	end
 
 	local function refreshTabLayout()
@@ -622,10 +684,10 @@ function LiquidGlass:Tab(name)
 	tabBtn.MouseButton1Click:Connect(function()
 		for _, t in ipairs(self._tabs) do
 			t._scroll.Visible = false
-			t._btn.TextColor3 = CONFIG.SecondaryLabel
+			t._btn.TextColor3 = Color3.fromRGB(180, 190, 210)
 		end
 		scroll.Visible = true
-		tabBtn.TextColor3 = CONFIG.Label
+		tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 		local count = #self._tabs
 		local index = 1
@@ -645,19 +707,7 @@ function LiquidGlass:Tab(name)
 	refreshTabLayout()
 
 	local function makeRow(height)
-		local row = newInstance("Frame", {
-			BackgroundColor3 = CONFIG.RowBg,
-			BackgroundTransparency = 0.05,
-			BorderSizePixel = 0,
-			Size = UDim2.new(1, 0, 0, height),
-			ZIndex = 10,
-			Parent = scroll,
-		})
-		newInstance("UICorner", {
-			CornerRadius = UDim.new(0, CONFIG.RowRadius),
-			Parent = row,
-		})
-		return row
+		return makeGlassRow(scroll, height)
 	end
 
 	tab.Label = function(opts)
@@ -669,28 +719,26 @@ function LiquidGlass:Tab(name)
 			TextColor3 = CONFIG.SecondaryLabel,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Size = UDim2.new(1, 0, 0, 22),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = scroll,
 		})
 	end
 
 	tab.Separator = function()
 		return newInstance("Frame", {
-			BackgroundColor3 = CONFIG.Separator,
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 0.85,
 			BorderSizePixel = 0,
 			Size = UDim2.new(1, -16, 0, 1),
 			Position = UDim2.fromOffset(16, 0),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = scroll,
 		})
 	end
 
 	tab.Button = function(opts)
-		local holder = makeRow(52)
-		local scale = newInstance("UIScale", {
-			Scale = 1,
-			Parent = holder,
-		})
+		local holder, stroke = makeRow(52)
+		local scale = newInstance("UIScale", { Scale = 1, Parent = holder })
 
 		local label = newInstance("TextLabel", {
 			BackgroundTransparency = 1,
@@ -701,11 +749,11 @@ function LiquidGlass:Tab(name)
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Position = UDim2.fromOffset(16, 0),
 			Size = UDim2.new(1, -60, 1, 0),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
 
-		local arrow = newInstance("TextLabel", {
+		newInstance("TextLabel", {
 			BackgroundTransparency = 1,
 			Text = "›",
 			Font = CONFIG.FontBold,
@@ -714,7 +762,7 @@ function LiquidGlass:Tab(name)
 			TextXAlignment = Enum.TextXAlignment.Right,
 			Position = UDim2.new(1, -32, 0, 0),
 			Size = UDim2.fromOffset(20, 52),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
 
@@ -722,7 +770,7 @@ function LiquidGlass:Tab(name)
 			BackgroundTransparency = 1,
 			Text = "",
 			Size = UDim2.fromScale(1, 1),
-			ZIndex = 11,
+			ZIndex = 12,
 			Parent = holder,
 		})
 
@@ -730,7 +778,7 @@ function LiquidGlass:Tab(name)
 		table.insert(self._springs, {
 			spring = sp,
 			apply = function(v)
-				holder.BackgroundTransparency = 0.05 - v * 0.1
+				holder.BackgroundTransparency = 0.94 - v * 0.1
 			end,
 		})
 		holder.MouseEnter:Connect(function() sp.target = 1 end)
@@ -756,7 +804,7 @@ function LiquidGlass:Tab(name)
 		local holder = makeRow(52)
 		local state = opts.Default or false
 
-		local label = newInstance("TextLabel", {
+		newInstance("TextLabel", {
 			BackgroundTransparency = 1,
 			Text = opts.Text or "Toggle",
 			Font = CONFIG.Font,
@@ -765,48 +813,92 @@ function LiquidGlass:Tab(name)
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Position = UDim2.fromOffset(16, 0),
 			Size = UDim2.new(1, -90, 1, 0),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
 
-		local track = newInstance("Frame", {
-			Name = "Track",
-			BackgroundColor3 = state and CONFIG.Green or CONFIG.TrackOff,
+		local pill = newInstance("Frame", {
+			Name = "Pill",
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = state and 0.85 or 0.88,
 			BorderSizePixel = 0,
-			Size = UDim2.fromOffset(51, 31),
-			Position = UDim2.new(1, -67, 0.5, -15),
-			ZIndex = 10,
+			Size = UDim2.fromOffset(56, 32),
+			Position = UDim2.new(1, -72, 0.5, -16),
+			ClipsDescendants = true,
+			ZIndex = 11,
 			Parent = holder,
 		})
 		newInstance("UICorner", {
 			CornerRadius = UDim.new(1, 0),
-			Parent = track,
+			Parent = pill,
+		})
+		newInstance("UIStroke", {
+			Color = Color3.fromRGB(255, 255, 255),
+			Thickness = 1,
+			Transparency = 0.75,
+			Parent = pill,
+		})
+
+		local pillGrad = newInstance("Frame", {
+			BackgroundColor3 = Color3.fromRGB(180, 200, 230),
+			BackgroundTransparency = 0.9,
+			BorderSizePixel = 0,
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 11,
+			Parent = pill,
+		})
+		newInstance("UICorner", {
+			CornerRadius = UDim.new(1, 0),
+			Parent = pillGrad,
+		})
+		newInstance("UIGradient", {
+			Rotation = 135,
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.7),
+				NumberSequenceKeypoint.new(1, 0.95),
+			}),
+			Parent = pillGrad,
 		})
 
 		local knob = newInstance("Frame", {
 			Name = "Knob",
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 0.15,
 			BorderSizePixel = 0,
-			Size = UDim2.fromOffset(27, 27),
-			Position = state and UDim2.fromOffset(22, 2) or UDim2.fromOffset(2, 2),
-			ZIndex = 12,
-			Parent = track,
+			Size = UDim2.fromOffset(28, 28),
+			Position = state and UDim2.fromOffset(26, 2) or UDim2.fromOffset(2, 2),
+			ZIndex = 13,
+			Parent = pill,
 		})
 		newInstance("UICorner", {
 			CornerRadius = UDim.new(1, 0),
+			Parent = knob,
+		})
+		newInstance("UIStroke", {
+			Color = Color3.fromRGB(255, 255, 255),
+			Thickness = 1,
+			Transparency = 0.5,
 			Parent = knob,
 		})
 
 		local knobSpec = newInstance("Frame", {
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BackgroundTransparency = 0.35,
+			BackgroundTransparency = 0.25,
 			BorderSizePixel = 0,
-			Size = UDim2.new(1, 0, 0.5, 0),
-			ZIndex = 13,
+			Size = UDim2.new(1, 0, 0.45, 0),
+			ZIndex = 14,
 			Parent = knob,
 		})
 		newInstance("UICorner", {
 			CornerRadius = UDim.new(1, 0),
+			Parent = knobSpec,
+		})
+		newInstance("UIGradient", {
+			Rotation = 90,
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
 			Parent = knobSpec,
 		})
 
@@ -814,22 +906,25 @@ function LiquidGlass:Tab(name)
 			BackgroundTransparency = 1,
 			Text = "",
 			Size = UDim2.fromScale(1, 1),
-			ZIndex = 14,
+			ZIndex = 15,
 			Parent = holder,
 		})
 
 		local function setState(newState, animate)
 			state = newState
-			local targetPos = state and UDim2.fromOffset(22, 2) or UDim2.fromOffset(2, 2)
+			local targetPos = state and UDim2.fromOffset(26, 2) or UDim2.fromOffset(2, 2)
 			if animate then
-				TweenService:Create(track, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-					BackgroundColor3 = state and CONFIG.Green or CONFIG.TrackOff,
+				TweenService:Create(pill, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+					BackgroundTransparency = state and 0.85 or 0.88,
 				}):Play()
-				TweenService:Create(knob, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				TweenService:Create(pillGrad, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+					BackgroundColor3 = state and Color3.fromRGB(48, 209, 88) or Color3.fromRGB(180, 200, 230),
+				}):Play()
+				TweenService:Create(knob, TweenInfo.new(0.42, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 					Position = targetPos,
 				}):Play()
 			else
-				track.BackgroundColor3 = state and CONFIG.Green or CONFIG.TrackOff
+				pillGrad.BackgroundColor3 = state and Color3.fromRGB(48, 209, 88) or Color3.fromRGB(180, 200, 230)
 				knob.Position = targetPos
 			end
 			if opts.Callback then
@@ -839,19 +934,19 @@ function LiquidGlass:Tab(name)
 
 		btn.MouseButton1Down:Connect(function()
 			TweenService:Create(knob, TweenInfo.new(0.15, Enum.EasingStyle.Quart), {
-				Size = UDim2.fromOffset(30, 27),
+				Size = UDim2.fromOffset(32, 30),
 			}):Play()
 		end)
 		btn.MouseButton1Up:Connect(function()
-			TweenService:Create(knob, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-				Size = UDim2.fromOffset(27, 27),
+			TweenService:Create(knob, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				Size = UDim2.fromOffset(28, 28),
 			}):Play()
 			setState(not state, true)
 			hapticSmall()
 		end)
 		btn.MouseLeave:Connect(function()
 			TweenService:Create(knob, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {
-				Size = UDim2.fromOffset(27, 27),
+				Size = UDim2.fromOffset(28, 28),
 			}):Play()
 		end)
 		return holder
@@ -872,7 +967,7 @@ function LiquidGlass:Tab(name)
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Position = UDim2.fromOffset(16, 10),
 			Size = UDim2.new(1, -80, 0, 18),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
 		local valueLbl = newInstance("TextLabel", {
@@ -884,16 +979,17 @@ function LiquidGlass:Tab(name)
 			TextXAlignment = Enum.TextXAlignment.Right,
 			Position = UDim2.new(1, -70, 0, 10),
 			Size = UDim2.fromOffset(54, 18),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
 
 		local track = newInstance("Frame", {
-			BackgroundColor3 = CONFIG.TrackOff,
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 0.8,
 			BorderSizePixel = 0,
-			Size = UDim2.new(1, -32, 0, 4),
+			Size = UDim2.new(1, -32, 0, 6),
 			Position = UDim2.new(0, 16, 1, -22),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
 		newInstance("UICorner", {
@@ -902,10 +998,11 @@ function LiquidGlass:Tab(name)
 		})
 
 		local fill = newInstance("Frame", {
-			BackgroundColor3 = CONFIG.Accent,
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 0.2,
 			BorderSizePixel = 0,
 			Size = UDim2.new((value - min) / (max - min), 0, 1, 0),
-			ZIndex = 11,
+			ZIndex = 12,
 			Parent = track,
 		})
 		newInstance("UICorner", {
@@ -915,30 +1012,44 @@ function LiquidGlass:Tab(name)
 
 		local knob = newInstance("Frame", {
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 0.15,
 			BorderSizePixel = 0,
 			Size = UDim2.fromOffset(24, 24),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.new((value - min) / (max - min), 0, 0.5, 0),
-			ZIndex = 12,
+			ZIndex = 13,
 			Parent = track,
 		})
 		newInstance("UICorner", {
 			CornerRadius = UDim.new(1, 0),
 			Parent = knob,
 		})
-
-		local knobShadow = newInstance("ImageLabel", {
-			BackgroundTransparency = 1,
-			Image = CONFIG.Shadow,
-			ImageColor3 = Color3.fromRGB(0, 0, 0),
-			ImageTransparency = 0.5,
-			ScaleType = Enum.ScaleType.Slice,
-			SliceCenter = Rect.new(99, 99, 99, 99),
-			Size = UDim2.fromOffset(34, 34),
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.fromScale(0.5, 0.5),
-			ZIndex = 11,
+		newInstance("UIStroke", {
+			Color = Color3.fromRGB(255, 255, 255),
+			Thickness = 1,
+			Transparency = 0.4,
 			Parent = knob,
+		})
+
+		local knobSpec = newInstance("Frame", {
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 0.25,
+			BorderSizePixel = 0,
+			Size = UDim2.new(1, 0, 0.45, 0),
+			ZIndex = 14,
+			Parent = knob,
+		})
+		newInstance("UICorner", {
+			CornerRadius = UDim.new(1, 0),
+			Parent = knobSpec,
+		})
+		newInstance("UIGradient", {
+			Rotation = 90,
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
+			Parent = knobSpec,
 		})
 
 		local dragging = false
@@ -959,7 +1070,7 @@ function LiquidGlass:Tab(name)
 			Text = "",
 			Size = UDim2.new(1, 0, 0, 34),
 			Position = UDim2.new(0, 0, 1, -36),
-			ZIndex = 13,
+			ZIndex = 15,
 			Parent = holder,
 		})
 
@@ -1011,21 +1122,23 @@ function LiquidGlass:Tab(name)
 			ClearTextOnFocus = false,
 			Position = UDim2.fromOffset(16, 0),
 			Size = UDim2.new(1, -32, 1, 0),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
-		local focusRing = newInstance("UIStroke", {
-			Color = CONFIG.Accent,
-			Thickness = 2,
+
+		local focusStroke = newInstance("UIStroke", {
+			Color = Color3.fromRGB(10, 132, 255),
+			Thickness = 1.5,
 			Transparency = 1,
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 			Parent = holder,
 		})
+
 		box.Focused:Connect(function()
-			TweenService:Create(focusRing, TweenInfo.new(0.2), { Transparency = 0.2 }):Play()
+			TweenService:Create(focusStroke, TweenInfo.new(0.2), { Transparency = 0.1 }):Play()
 		end)
 		box.FocusLost:Connect(function()
-			TweenService:Create(focusRing, TweenInfo.new(0.2), { Transparency = 1 }):Play()
+			TweenService:Create(focusStroke, TweenInfo.new(0.2), { Transparency = 1 }):Play()
 			if opts.Callback then
 				pcall(opts.Callback, box.Text)
 			end
@@ -1047,13 +1160,13 @@ function LiquidGlass:Tab(name)
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Position = UDim2.fromOffset(16, 0),
 			Size = UDim2.new(1, -110, 1, 0),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
 
 		local valueLbl = newInstance("TextButton", {
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BackgroundTransparency = 0.9,
+			BackgroundTransparency = 0.85,
 			BorderSizePixel = 0,
 			Text = current.Name,
 			Font = CONFIG.Font,
@@ -1061,11 +1174,17 @@ function LiquidGlass:Tab(name)
 			TextColor3 = CONFIG.Label,
 			Size = UDim2.fromOffset(80, 30),
 			Position = UDim2.new(1, -96, 0.5, -15),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
 		newInstance("UICorner", {
 			CornerRadius = UDim.new(0, 8),
+			Parent = valueLbl,
+		})
+		newInstance("UIStroke", {
+			Color = Color3.fromRGB(255, 255, 255),
+			Thickness = 1,
+			Transparency = 0.6,
 			Parent = valueLbl,
 		})
 
@@ -1111,7 +1230,7 @@ function LiquidGlass:Tab(name)
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Position = UDim2.fromOffset(16, 0),
 			Size = UDim2.new(1, -110, 1, 0),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
 
@@ -1122,7 +1241,7 @@ function LiquidGlass:Tab(name)
 
 		local valueLbl = newInstance("TextButton", {
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BackgroundTransparency = 0.9,
+			BackgroundTransparency = 0.85,
 			BorderSizePixel = 0,
 			Text = tostring(current or "--"),
 			Font = CONFIG.Font,
@@ -1131,11 +1250,17 @@ function LiquidGlass:Tab(name)
 			TextXAlignment = Enum.TextXAlignment.Right,
 			Size = UDim2.fromOffset(120, 30),
 			Position = UDim2.new(1, -136, 0.5, -15),
-			ZIndex = 10,
+			ZIndex = 11,
 			Parent = holder,
 		})
 		newInstance("UICorner", {
 			CornerRadius = UDim.new(0, 8),
+			Parent = valueLbl,
+		})
+		newInstance("UIStroke", {
+			Color = Color3.fromRGB(255, 255, 255),
+			Thickness = 1,
+			Transparency = 0.6,
 			Parent = valueLbl,
 		})
 		newInstance("UIPadding", {
@@ -1169,7 +1294,8 @@ function LiquidGlass:Tab(name)
 		})
 
 		local sheet = newInstance("Frame", {
-			BackgroundColor3 = Color3.fromRGB(28, 28, 30),
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 0.85,
 			BorderSizePixel = 0,
 			Size = UDim2.new(1, 0, 0, finalHeight + 40),
 			Position = UDim2.new(0, 0, 1, 0),
@@ -1183,9 +1309,36 @@ function LiquidGlass:Tab(name)
 			CornerRadius = UDim.new(0, 20),
 			Parent = sheet,
 		})
+		newInstance("UIStroke", {
+			Color = Color3.fromRGB(255, 255, 255),
+			Thickness = 1,
+			Transparency = 0.7,
+			Parent = sheet,
+		})
+
+		local sheetGrad = newInstance("Frame", {
+			BackgroundColor3 = Color3.fromRGB(180, 200, 230),
+			BackgroundTransparency = 0.9,
+			BorderSizePixel = 0,
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 201,
+			Parent = sheet,
+		})
+		newInstance("UICorner", {
+			CornerRadius = UDim.new(0, 20),
+			Parent = sheetGrad,
+		})
+		newInstance("UIGradient", {
+			Rotation = 135,
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.6),
+				NumberSequenceKeypoint.new(1, 0.95),
+			}),
+			Parent = sheetGrad,
+		})
 
 		local handle = newInstance("Frame", {
-			BackgroundColor3 = Color3.fromRGB(120, 120, 128),
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 0.4,
 			BorderSizePixel = 0,
 			Size = UDim2.fromOffset(36, 5),
