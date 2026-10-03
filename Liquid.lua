@@ -12,23 +12,23 @@ local CONFIG = {
 	Accent = Color3.fromRGB(0, 145, 255),
 	Background = Color3.fromRGB(16, 16, 16),
 	Dialog = Color3.fromRGB(26, 26, 26),
-	PanelBackground = Color3.fromRGB(255, 255, 255),
-	PanelBackgroundTransparency = 0.95,
-	ElementBackground = Color3.fromRGB(42, 42, 44),
+	PanelBackground = Color3.fromRGB(0, 0, 0),
+	PanelBackgroundTransparency = 0.55,
+	ElementBackground = Color3.fromRGB(30, 30, 34),
 	ElementBackgroundTransparency = 0,
 	ElementTitle = Color3.fromRGB(255, 255, 255),
-	ElementDesc = Color3.fromRGB(255, 255, 255),
-	TabBackground = Color3.fromRGB(24, 24, 27),
-	TabBackgroundActive = Color3.fromRGB(40, 40, 44),
+	ElementDesc = Color3.fromRGB(220, 225, 235),
+	TabBackground = Color3.fromRGB(255, 255, 255),
+	TabBackgroundActive = Color3.fromRGB(60, 60, 65),
 	TabText = Color3.fromRGB(255, 255, 255),
-	TabTextTransparency = 0.3,
+	TabTextTransparency = 0.45,
 	TabTextTransparencyActive = 0,
 	Toggle = Color3.fromRGB(51, 199, 89),
 	Slider = Color3.fromRGB(0, 145, 255),
 	SliderThumb = Color3.fromRGB(255, 255, 255),
 	Outline = Color3.fromRGB(255, 255, 255),
 	GlassTint = Color3.fromRGB(255, 255, 255),
-	GlassTransparency = 0.9,
+	GlassTransparency = 0.97,
 	CornerRadius = 16,
 	ElementRadius = 12,
 	Font = Enum.Font.GothamMedium,
@@ -150,7 +150,7 @@ function LiquidGlass:_build()
 
 	self.Panel = newInstance("Frame", {
 		Name = "Panel",
-		BackgroundColor3 = CONFIG.Background,
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
@@ -165,7 +165,7 @@ function LiquidGlass:_build()
 
 	self.GlassLayer = newInstance("Frame", {
 		Name = "GlassLayer",
-		BackgroundColor3 = CONFIG.GlassTint,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
@@ -179,9 +179,9 @@ function LiquidGlass:_build()
 	newInstance("UIGradient", {
 		Rotation = 135,
 		Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.9),
-			NumberSequenceKeypoint.new(0.5, 0.97),
-			NumberSequenceKeypoint.new(1, 0.9),
+			NumberSequenceKeypoint.new(0, 0.94),
+			NumberSequenceKeypoint.new(0.5, 0.99),
+			NumberSequenceKeypoint.new(1, 0.94),
 		}),
 		Parent = self.GlassLayer,
 	})
@@ -239,7 +239,7 @@ function LiquidGlass:_build()
 			Font = CONFIG.Font,
 			TextSize = 13,
 			TextColor3 = CONFIG.ElementDesc,
-			TextTransparency = 0.4,
+			TextTransparency = 0.2,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Position = UDim2.fromOffset(20, 30),
 			Size = UDim2.new(1, -120, 0, 14),
@@ -273,6 +273,17 @@ function LiquidGlass:_build()
 	})
 	newInstance("UICorner", { CornerRadius = UDim.new(1, 0), Parent = closeBtn })
 	closeBtn.MouseButton1Click:Connect(function() self:Close() end)
+
+	self.SidebarBackground = newInstance("Frame", {
+		Name = "SidebarBg",
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+		BackgroundTransparency = 0.75,
+		BorderSizePixel = 0,
+		Size = UDim2.new(0, self.SideBarWidth, 1, -52),
+		Position = UDim2.new(0, 0, 0, 52),
+		ZIndex = 9,
+		Parent = self.Panel,
+	})
 
 	self.SidebarContainer = newInstance("Frame", {
 		Name = "SidebarContainer",
@@ -315,8 +326,8 @@ function LiquidGlass:_build()
 
 	self.PanelBackground = newInstance("Frame", {
 		Name = "PanelBg",
-		BackgroundColor3 = CONFIG.PanelBackground,
-		BackgroundTransparency = CONFIG.PanelBackgroundTransparency,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 0.75,
 		BorderSizePixel = 0,
 		Size = UDim2.new(1, -14, 1, -14),
 		Position = UDim2.fromOffset(7, 7),
@@ -325,6 +336,12 @@ function LiquidGlass:_build()
 	})
 	newInstance("UICorner", {
 		CornerRadius = UDim.new(0, CONFIG.CornerRadius - 6),
+		Parent = self.PanelBackground,
+	})
+	newInstance("UIStroke", {
+		Color = Color3.fromRGB(255, 255, 255),
+		Thickness = 1,
+		Transparency = 0.8,
 		Parent = self.PanelBackground,
 	})
 
@@ -434,8 +451,8 @@ function LiquidGlass:_startLoop()
 			self.Size.Y.Offset * s
 		)
 
-		self.Panel.BackgroundTransparency = 1 - a
-		self.GlassLayer.BackgroundTransparency = 1 - 0.9 * a
+		self.Panel.BackgroundTransparency = 1 - 0.45 * a
+		self.GlassLayer.BackgroundTransparency = 1 - 0.97 * a
 		self.Noise.ImageTransparency = 1 - 0.04 * a
 		self.Edge.Transparency = 1 - 0.7 * a
 		self.Shadow.ImageTransparency = 1 - 0.5 * a
@@ -491,12 +508,12 @@ function LiquidGlass:_bindInput()
 	end))
 end
 
-function LiquidGlass:Tab(name, icon)
+function LiquidGlass:Tab(name)
 	local tab = {}
 	tab.Name = name
 
 	local tabBtn = newInstance("TextButton", {
-		BackgroundColor3 = CONFIG.TabBackground,
+		BackgroundColor3 = CONFIG.TabBackgroundActive,
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		Text = name,
@@ -565,7 +582,7 @@ function LiquidGlass:Tab(name, icon)
 		end
 		list.Visible = true
 		TweenService:Create(tabBtn, TweenInfo.new(0.2), {
-			BackgroundTransparency = 0,
+			BackgroundTransparency = 0.15,
 			TextTransparency = CONFIG.TabTextTransparencyActive,
 		}):Play()
 	end
@@ -590,9 +607,9 @@ function LiquidGlass:Tab(name, icon)
 			Parent = row,
 		})
 		newInstance("UIStroke", {
-			Color = CONFIG.Outline,
+			Color = Color3.fromRGB(255, 255, 255),
 			Thickness = 1,
-			Transparency = 0.9,
+			Transparency = 0.85,
 			Parent = row,
 		})
 		return row
@@ -605,7 +622,7 @@ function LiquidGlass:Tab(name, icon)
 			Font = CONFIG.FontBold,
 			TextSize = 13,
 			TextColor3 = CONFIG.ElementDesc,
-			TextTransparency = 0.3,
+			TextTransparency = 0.2,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Size = UDim2.new(1, 0, 0, 22),
 			ZIndex = 11,
@@ -648,7 +665,7 @@ function LiquidGlass:Tab(name, icon)
 			Font = CONFIG.FontBold,
 			TextSize = 20,
 			TextColor3 = CONFIG.ElementDesc,
-			TextTransparency = 0.4,
+			TextTransparency = 0.2,
 			TextXAlignment = Enum.TextXAlignment.Right,
 			Position = UDim2.new(1, -28, 0, 0),
 			Size = UDim2.fromOffset(18, 42),
@@ -761,7 +778,7 @@ function LiquidGlass:Tab(name, icon)
 		local value = opts.Default or min
 
 		local holder = createRow(52)
-		local label = newInstance("TextLabel", {
+		newInstance("TextLabel", {
 			BackgroundTransparency = 1,
 			Text = opts.Text or "Slider",
 			Font = CONFIG.Font,
@@ -779,7 +796,7 @@ function LiquidGlass:Tab(name, icon)
 			Font = CONFIG.Font,
 			TextSize = 13,
 			TextColor3 = CONFIG.ElementDesc,
-			TextTransparency = 0.3,
+			TextTransparency = 0.2,
 			TextXAlignment = Enum.TextXAlignment.Right,
 			Position = UDim2.new(1, -60, 0, 6),
 			Size = UDim2.fromOffset(46, 16),
