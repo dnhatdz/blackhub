@@ -5,10 +5,8 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
 
 local LOCAL_PLAYER = Players.LocalPlayer
-local MOUSE = LOCAL_PLAYER:GetMouse()
 
 local CONFIG = {
 	Accent = Color3.fromRGB(120, 170, 255),
@@ -17,32 +15,20 @@ local CONFIG = {
 	GlassTransparency = 0.88,
 	PanelTransparency = 0.82,
 	CornerRadius = 22,
-	MagnifierRadius = 110,
-	MagnifierZoom = 1.85,
-	MagnifierStrength = 1,
-	MagnifierFalloff = 2.4,
 	SpringStiffness = 220,
 	SpringDamping = 26,
 	SpringMass = 1,
-	OpenDuration = 0.55,
-	CloseDuration = 0.38,
-	HoverScale = 1.04,
-	PressScale = 0.96,
 	Font = Enum.Font.GothamMedium,
 	FontBold = Enum.Font.GothamBold,
 	Noise = "rbxassetid://243098098",
-	MagnifierMask = "rbxassetid://5028857084",
-	Shadow = "rbxassetid://8992230677",
+	GlassMask = "rbxassetid://5028857084",
 	OpenButtonIcon = "rbxassetid://120997033468887",
 }
 
-local function newInstance(class, props, children)
+local function newInstance(class, props)
 	local inst = Instance.new(class)
 	for k, v in pairs(props or {}) do
 		inst[k] = v
-	end
-	for _, c in ipairs(children or {}) do
-		c.Parent = inst
 	end
 	return inst
 end
@@ -79,21 +65,17 @@ function LiquidGlass.new(opts)
 	opts = opts or {}
 	self._connections = {}
 	self._springs = {}
-	self._items = {}
 	self._tabs = {}
 	self._alive = true
 	self._open = false
 	self._dragging = false
-	self._magnifierEnabled = true
+	self._fullscreen = false
 
 	self.Title = opts.Title or "LiquidGlass"
 	self.Author = opts.Author or ""
 	self.Icon = opts.Icon
 	self.Size = opts.Size or UDim2.fromOffset(580, 440)
 	self.Position = opts.Position or UDim2.fromScale(0.5, 0.5)
-	self.MinSize = opts.MinSize or Vector2.new(480, 320)
-	self.MaxSize = opts.MaxSize or Vector2.new(900, 620)
-	self.Resizable = opts.Resizable ~= false
 	self.ToggleKey = opts.ToggleKey or Enum.KeyCode.RightShift
 	self.Parent = opts.Parent or LOCAL_PLAYER:WaitForChild("PlayerGui")
 
@@ -104,7 +86,6 @@ function LiquidGlass.new(opts)
 	self:_build()
 	self:_startLoop()
 	self:_bindInput()
-	self:_bindMagnifier()
 	return self
 end
 
@@ -136,8 +117,7 @@ function LiquidGlass:_build()
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Parent = gui,
 	})
-
-	self.ShellCorner = newInstance("UICorner", {
+	newInstance("UICorner", {
 		CornerRadius = UDim.new(0, CONFIG.CornerRadius),
 		Parent = self.Shell,
 	})
@@ -200,73 +180,6 @@ function LiquidGlass:_build()
 		Transparency = 1,
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 		Parent = self.Panel,
-	})
-
-	self.MagnifierCopy = newInstance("Frame", {
-		Name = "MagnifierCopy",
-		BackgroundTransparency = 1,
-		ClipsDescendants = true,
-		Size = UDim2.fromScale(1, 1),
-		Visible = false,
-		ZIndex = 6,
-		Parent = self.Panel,
-	})
-
-	self.MagnifierContent = newInstance("Frame", {
-		Name = "MagnifierContent",
-		BackgroundColor3 = CONFIG.BaseColor,
-		BackgroundTransparency = 0.2,
-		BorderSizePixel = 0,
-		Size = UDim2.fromScale(1, 1),
-		ZIndex = 6,
-		Parent = self.MagnifierCopy,
-	})
-	newInstance("UICorner", {
-		CornerRadius = UDim.new(0, CONFIG.CornerRadius),
-		Parent = self.MagnifierContent,
-	})
-	newInstance("UIGradient", {
-		Rotation = 135,
-		Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.5),
-			NumberSequenceKeypoint.new(0.5, 0.9),
-			NumberSequenceKeypoint.new(1, 0.5),
-		}),
-		Parent = self.MagnifierContent,
-	})
-
-	self.MagnifierMask = newInstance("ImageLabel", {
-		Name = "MagnifierMask",
-		BackgroundTransparency = 1,
-		Image = CONFIG.MagnifierMask,
-		ImageColor3 = Color3.fromRGB(255, 255, 255),
-		ImageTransparency = 0,
-		Size = UDim2.fromOffset(CONFIG.MagnifierRadius * 2, CONFIG.MagnifierRadius * 2),
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		ZIndex = 7,
-		Visible = false,
-		Parent = self.Panel,
-	})
-	newInstance("UICorner", {
-		CornerRadius = UDim.new(1, 0),
-		Parent = self.MagnifierMask,
-	})
-
-	self.MagnifierGlow = newInstance("ImageLabel", {
-		Name = "MagnifierGlow",
-		BackgroundTransparency = 1,
-		Image = CONFIG.MagnifierMask,
-		ImageColor3 = CONFIG.Accent,
-		ImageTransparency = 0.4,
-		Size = UDim2.fromOffset(CONFIG.MagnifierRadius * 2 + 8, CONFIG.MagnifierRadius * 2 + 8),
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		ZIndex = 5,
-		Visible = false,
-		Parent = self.Panel,
-	})
-	newInstance("UICorner", {
-		CornerRadius = UDim.new(1, 0),
-		Parent = self.MagnifierGlow,
 	})
 
 	self.Header = newInstance("Frame", {
@@ -386,77 +299,6 @@ function LiquidGlass:_build()
 	})
 end
 
-function LiquidGlass:_bindMagnifier()
-	local panel = self.Panel
-	local copy = self.MagnifierCopy
-	local content = self.MagnifierContent
-	local mask = self.MagnifierMask
-	local glow = self.MagnifierGlow
-	local backdrop = self.Backdrop
-
-	local conn = RunService.RenderStepped:Connect(function()
-		if not self._alive or not self._magnifierEnabled or not self._open then
-			copy.Visible = false
-			mask.Visible = false
-			glow.Visible = false
-			return
-		end
-
-		local mouse = UserInputService:GetMouseLocation()
-		local absPos = panel.AbsolutePosition
-		local absSize = panel.AbsoluteSize
-
-		local localX = mouse.X - absPos.X
-		local localY = mouse.Y - absPos.Y
-
-		if localX < 0 or localY < 0 or localX > absSize.X or localY > absSize.Y then
-			copy.Visible = false
-			mask.Visible = false
-			glow.Visible = false
-			return
-		end
-
-		local cx = absSize.X * 0.5
-		local cy = absSize.Y * 0.5
-		local dx = localX - cx
-		local dy = localY - cy
-		local dist = math.sqrt(dx * dx + dy * dy)
-		local maxDist = math.max(absSize.X, absSize.Y) * 0.5
-		local falloff = math.clamp(1 - dist / maxDist, 0, 1)
-		falloff = falloff ^ CONFIG.MagnifierFalloff
-		local strength = falloff * CONFIG.MagnifierStrength
-
-		if strength <= 0.02 then
-			copy.Visible = false
-			mask.Visible = false
-			glow.Visible = false
-			return
-		end
-
-		copy.Visible = true
-		mask.Visible = true
-		glow.Visible = true
-
-		local zoom = 1 + (CONFIG.MagnifierZoom - 1) * strength
-		local tx = cx + (localX - cx) * (1 - 1 / zoom)
-		local ty = cy + (localY - cy) * (1 - 1 / zoom)
-
-		content.Size = UDim2.fromScale(zoom, zoom)
-		content.Position = UDim2.fromOffset(-tx, -ty)
-		content.BackgroundTransparency = 1 - (0.2 + strength * 0.6)
-
-		local radius = CONFIG.MagnifierRadius * (0.9 + strength * 0.3)
-		mask.Size = UDim2.fromOffset(radius * 2, radius * 2)
-		mask.Position = UDim2.fromOffset(localX, localY)
-		mask.ImageTransparency = 1 - strength
-
-		glow.Size = UDim2.fromOffset(radius * 2 + 10, radius * 2 + 10)
-		glow.Position = UDim2.fromOffset(localX, localY)
-		glow.ImageTransparency = 1 - strength * 0.6
-	end)
-	table.insert(self._connections, conn)
-end
-
 function LiquidGlass:_startLoop()
 	local last = tick()
 	local conn = RunService.RenderStepped:Connect(function()
@@ -553,7 +395,27 @@ function LiquidGlass:_makeHoverSpring(obj, baseTransparency, hoverTransparency)
 	return sp
 end
 
-function LiquidGlass:Tab(name, icon)
+function LiquidGlass:_makeGlassRipple(parent, size)
+	local ripple = newInstance("ImageLabel", {
+		Name = "GlassRipple",
+		BackgroundTransparency = 1,
+		Image = CONFIG.GlassMask,
+		ImageColor3 = Color3.fromRGB(255, 255, 255),
+		ImageTransparency = 0.55,
+		Size = size,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		ZIndex = 0,
+		Parent = parent,
+	})
+	newInstance("UICorner", {
+		CornerRadius = UDim.new(1, 0),
+		Parent = ripple,
+	})
+	return ripple
+end
+
+function LiquidGlass:Tab(name)
 	local tab = {}
 	tab.Name = name
 
@@ -643,7 +505,7 @@ function LiquidGlass:Tab(name, icon)
 	end
 
 	tab.Label = function(opts)
-		local lbl = newInstance("TextLabel", {
+		return newInstance("TextLabel", {
 			BackgroundTransparency = 1,
 			Text = opts.Text or "",
 			Font = CONFIG.FontBold,
@@ -654,11 +516,10 @@ function LiquidGlass:Tab(name, icon)
 			ZIndex = 10,
 			Parent = list,
 		})
-		return lbl
 	end
 
 	tab.Separator = function()
-		local sep = newInstance("Frame", {
+		return newInstance("Frame", {
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 0.86,
 			BorderSizePixel = 0,
@@ -666,11 +527,15 @@ function LiquidGlass:Tab(name, icon)
 			ZIndex = 10,
 			Parent = list,
 		})
-		return sep
 	end
 
 	tab.Button = function(opts)
 		local holder = createRow(42)
+		local scale = newInstance("UIScale", {
+			Scale = 1,
+			Parent = holder,
+		})
+
 		local label = newInstance("TextLabel", {
 			BackgroundTransparency = 1,
 			Text = opts.Text or "Button",
@@ -702,6 +567,22 @@ function LiquidGlass:Tab(name, icon)
 			ZIndex = 11,
 			Parent = holder,
 		})
+
+		btn.MouseButton1Down:Connect(function()
+			TweenService:Create(scale, TweenInfo.new(0.18, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				Scale = 1.05,
+			}):Play()
+		end)
+		btn.MouseButton1Up:Connect(function()
+			TweenService:Create(scale, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				Scale = 1,
+			}):Play()
+		end)
+		btn.MouseLeave:Connect(function()
+			TweenService:Create(scale, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				Scale = 1,
+			}):Play()
+		end)
 		btn.MouseButton1Click:Connect(function()
 			if opts.Callback then
 				pcall(opts.Callback)
@@ -714,7 +595,7 @@ function LiquidGlass:Tab(name, icon)
 		local holder = createRow(42)
 		local state = opts.Default or false
 
-		local label = newInstance("TextLabel", {
+		newInstance("TextLabel", {
 			BackgroundTransparency = 1,
 			Text = opts.Text or "Toggle",
 			Font = CONFIG.Font,
@@ -740,6 +621,23 @@ function LiquidGlass:Tab(name, icon)
 			Parent = pill,
 		})
 
+		local pillScale = newInstance("UIScale", {
+			Scale = 1,
+			Parent = pill,
+		})
+
+		local glassSweep = newInstance("ImageLabel", {
+			Name = "GlassSweep",
+			BackgroundTransparency = 1,
+			Image = CONFIG.GlassMask,
+			ImageColor3 = Color3.fromRGB(255, 255, 255),
+			ImageTransparency = 1,
+			Size = UDim2.fromScale(2, 1),
+			Position = UDim2.fromScale(-2, 0),
+			ZIndex = 12,
+			Parent = pill,
+		})
+
 		local knob = newInstance("Frame", {
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BorderSizePixel = 0,
@@ -757,17 +655,38 @@ function LiquidGlass:Tab(name, icon)
 			BackgroundTransparency = 1,
 			Text = "",
 			Size = UDim2.fromScale(1, 1),
-			ZIndex = 12,
+			ZIndex = 13,
 			Parent = holder,
 		})
+
 		btn.MouseButton1Click:Connect(function()
 			state = not state
-			TweenService:Create(pill, TweenInfo.new(0.22, Enum.EasingStyle.Quart), {
+
+			TweenService:Create(pill, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
 				BackgroundColor3 = state and CONFIG.Accent or Color3.fromRGB(80, 85, 100),
 			}):Play()
-			TweenService:Create(knob, TweenInfo.new(0.22, Enum.EasingStyle.Quart), {
+			TweenService:Create(knob, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 				Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.fromOffset(2, 2),
 			}):Play()
+
+			TweenService:Create(pillScale, TweenInfo.new(0.16, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				Scale = 1.15,
+			}):Play()
+			task.delay(0.16, function()
+				TweenService:Create(pillScale, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					Scale = 1,
+				}):Play()
+			end)
+
+			glassSweep.Position = UDim2.fromScale(-2, 0)
+			glassSweep.ImageTransparency = 0.5
+			TweenService:Create(glassSweep, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				Position = UDim2.fromScale(2, 0),
+			}):Play()
+			TweenService:Create(glassSweep, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				ImageTransparency = 1,
+			}):Play()
+
 			if opts.Callback then
 				pcall(opts.Callback, state)
 			end
@@ -781,7 +700,7 @@ function LiquidGlass:Tab(name, icon)
 		local value = opts.Default or min
 
 		local holder = createRow(56)
-		local label = newInstance("TextLabel", {
+		newInstance("TextLabel", {
 			BackgroundTransparency = 1,
 			Text = opts.Text or "Slider",
 			Font = CONFIG.Font,
@@ -829,6 +748,7 @@ function LiquidGlass:Tab(name, icon)
 			CornerRadius = UDim.new(1, 0),
 			Parent = fill,
 		})
+
 		local knob = newInstance("Frame", {
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BorderSizePixel = 0,
@@ -841,6 +761,23 @@ function LiquidGlass:Tab(name, icon)
 		newInstance("UICorner", {
 			CornerRadius = UDim.new(1, 0),
 			Parent = knob,
+		})
+
+		local glassAround = newInstance("ImageLabel", {
+			Name = "GlassAround",
+			BackgroundTransparency = 1,
+			Image = CONFIG.GlassMask,
+			ImageColor3 = CONFIG.Accent,
+			ImageTransparency = 1,
+			Size = UDim2.fromOffset(34, 34),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.new(0, 0, 0.5, 0),
+			ZIndex = 9,
+			Parent = track,
+		})
+		newInstance("UICorner", {
+			CornerRadius = UDim.new(1, 0),
+			Parent = glassAround,
 		})
 
 		local dragging = false
@@ -869,6 +806,10 @@ function LiquidGlass:Tab(name, icon)
 				or input.UserInputType == Enum.UserInputType.Touch then
 				dragging = true
 				update(input)
+				glassAround.Visible = true
+				TweenService:Create(glassAround, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+					ImageTransparency = 0.55,
+				}):Play()
 			end
 		end)
 		table.insert(self._connections, UserInputService.InputChanged:Connect(function(input)
@@ -881,6 +822,10 @@ function LiquidGlass:Tab(name, icon)
 			if input.UserInputType == Enum.UserInputType.MouseButton1
 				or input.UserInputType == Enum.UserInputType.Touch then
 				dragging = false
+				TweenService:Create(glassAround, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+					ImageTransparency = 1,
+					Size = UDim2.fromOffset(14, 14),
+				}):Play()
 			end
 		end))
 		return holder
@@ -913,7 +858,7 @@ function LiquidGlass:Tab(name, icon)
 
 	tab.Keybind = function(opts)
 		local holder = createRow(42)
-		local label = newInstance("TextLabel", {
+		newInstance("TextLabel", {
 			BackgroundTransparency = 1,
 			Text = opts.Text or "Keybind",
 			Font = CONFIG.Font,
@@ -971,8 +916,8 @@ function LiquidGlass:Tab(name, icon)
 
 	tab.Dropdown = function(opts)
 		local values = opts.Values or {}
-		local holder = createRow(42 + (#values > 0 and 0 or 0))
-		local label = newInstance("TextLabel", {
+		local holder = createRow(42)
+		newInstance("TextLabel", {
 			BackgroundTransparency = 1,
 			Text = opts.Text or "Dropdown",
 			Font = CONFIG.Font,
@@ -1009,13 +954,14 @@ function LiquidGlass:Tab(name, icon)
 		})
 
 		local open = false
+		local listHeight = math.min(#values * 30 + 12, 180)
+
 		local list = newInstance("Frame", {
 			BackgroundColor3 = Color3.fromRGB(30, 33, 42),
 			BackgroundTransparency = 0.05,
 			BorderSizePixel = 0,
 			Size = UDim2.new(1, 0, 0, 0),
 			Position = UDim2.new(0, 0, 1, 6),
-			AutomaticSize = Enum.AutomaticSize.Y,
 			ClipsDescendants = true,
 			Visible = false,
 			ZIndex = 20,
@@ -1025,15 +971,29 @@ function LiquidGlass:Tab(name, icon)
 			CornerRadius = UDim.new(0, 10),
 			Parent = list,
 		})
+
+		local scroll = newInstance("ScrollingFrame", {
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			Size = UDim2.fromScale(1, 1),
+			ScrollBarThickness = 2,
+			ScrollBarImageColor3 = CONFIG.Accent,
+			CanvasSize = UDim2.new(),
+			AutomaticCanvasSize = Enum.AutomaticSize.Y,
+			ScrollingDirection = Enum.ScrollingDirection.Y,
+			ElasticBehavior = Enum.ElasticBehavior.WhenScrollable,
+			ZIndex = 21,
+			Parent = list,
+		})
 		newInstance("UIListLayout", {
 			Padding = UDim.new(0, 2),
 			SortOrder = Enum.SortOrder.LayoutOrder,
-			Parent = list,
+			Parent = scroll,
 		})
 		newInstance("UIPadding", {
 			PaddingTop = UDim.new(0, 6),
 			PaddingBottom = UDim.new(0, 6),
-			Parent = list,
+			Parent = scroll,
 		})
 
 		for _, v in ipairs(values) do
@@ -1046,8 +1006,8 @@ function LiquidGlass:Tab(name, icon)
 				TextColor3 = Color3.fromRGB(220, 230, 250),
 				TextXAlignment = Enum.TextXAlignment.Left,
 				Size = UDim2.new(1, 0, 0, 28),
-				ZIndex = 21,
-				Parent = list,
+				ZIndex = 22,
+				Parent = scroll,
 			})
 			newInstance("UIPadding", {
 				PaddingLeft = UDim.new(0, 12),
@@ -1062,8 +1022,13 @@ function LiquidGlass:Tab(name, icon)
 			opt.MouseButton1Click:Connect(function()
 				current = title
 				valueLbl.Text = title
-				list.Visible = false
 				open = false
+				TweenService:Create(list, TweenInfo.new(0.24, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+					Size = UDim2.new(1, 0, 0, 0),
+				}):Play()
+				task.delay(0.24, function()
+					list.Visible = false
+				end)
 				if opts.Callback then
 					pcall(opts.Callback, v)
 				end
@@ -1072,7 +1037,22 @@ function LiquidGlass:Tab(name, icon)
 
 		valueLbl.MouseButton1Click:Connect(function()
 			open = not open
-			list.Visible = open
+			if open then
+				list.Visible = true
+				list.Size = UDim2.new(1, 0, 0, 0)
+				TweenService:Create(list, TweenInfo.new(0.28, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+					Size = UDim2.new(1, 0, 0, listHeight),
+				}):Play()
+			else
+				TweenService:Create(list, TweenInfo.new(0.24, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+					Size = UDim2.new(1, 0, 0, 0),
+				}):Play()
+				task.delay(0.24, function()
+					if not open then
+						list.Visible = false
+					end
+				end)
+			end
 		end)
 		return holder
 	end
@@ -1131,23 +1111,6 @@ function LiquidGlass:Toggle()
 	else
 		self:Open()
 	end
-end
-
-function LiquidGlass:SetMagnifierEnabled(state)
-	self._magnifierEnabled = state
-	if not state then
-		self.MagnifierCopy.Visible = false
-		self.MagnifierMask.Visible = false
-		self.MagnifierGlow.Visible = false
-	end
-end
-
-function LiquidGlass:SetMagnifierZoom(z)
-	CONFIG.MagnifierZoom = z
-end
-
-function LiquidGlass:SetMagnifierRadius(r)
-	CONFIG.MagnifierRadius = r
 end
 
 function LiquidGlass:Destroy()
