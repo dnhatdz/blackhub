@@ -364,30 +364,43 @@ return { CreateWindow = function(arg, arg2)
 	tbl3.frame.Name = "FrameToggleUI"
 	tbl3.frame.Size = UDim2.new(0, 60, 0, 60)
 	tbl3.frame.BackgroundColor3 = Color3.fromRGB(18, 12, 6)
+	tbl3.frame.BackgroundTransparency = 0.1
 	tbl3.frame.BorderSizePixel = 0
 	tbl3.frame.AnchorPoint = Vector2.new(0.5, 0.5)
 	tbl3.frame.Position = UDim2.new(0.2, 0, 0.2, 0)
 	tbl3.frame.Visible = false
 	tbl3.frame.ZIndex = 1000
 	tbl3.frame.Active = true
-	Instance.new("UICorner", tbl3.frame).CornerRadius = UDim.new(0, 100)
+	Instance.new("UICorner", tbl3.frame).CornerRadius = UDim.new(1, 0)
 
 	local uiStrokeFrame = Instance.new("UIStroke", tbl3.frame)
 	uiStrokeFrame.Color = Color3.fromRGB(255, 145, 0)
-	uiStrokeFrame.Thickness = 1.5
+	uiStrokeFrame.Thickness = 2
+	uiStrokeFrame.Transparency = 0
+	uiStrokeFrame.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+	local uiGradientFrame = Instance.new("UIGradient", uiStrokeFrame)
+	uiGradientFrame.Rotation = 90
+	uiGradientFrame.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 190, 80)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 145, 0)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 100, 0)),
+	})
 
 	tbl3.click = Instance.new("ImageButton", tbl3.frame)
 	tbl3.click.Name = "ClickUI"
-	tbl3.click.Size = UDim2.new(0, 55, 0, 45)
+	tbl3.click.Size = UDim2.new(0, 42, 0, 42)
 	tbl3.click.Image = "rbxassetid://12359659240"
 	tbl3.click.AnchorPoint = Vector2.new(0.5, 0.5)
 	tbl3.click.Position = UDim2.new(0.5, 0, 0.5, 0)
-	tbl3.click.BackgroundColor3 = Color3.new(0, 0, 0)
+	tbl3.click.BackgroundColor3 = Color3.new(1, 1, 1)
 	tbl3.click.BackgroundTransparency = 1
 	tbl3.click.BorderSizePixel = 0
 	tbl3.click.AutoButtonColor = false
 	tbl3.click.ZIndex = 1001
-	tbl3.click.ImageColor3 = Color3.fromRGB(255, 145, 0)
+	tbl3.click.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	tbl3.click.ScaleType = Enum.ScaleType.Fit
+	Instance.new("UICorner", tbl3.click).CornerRadius = UDim.new(1, 0)
 
 	textButton3.MouseButton1Click:Connect(function()
 		fn(uiScale, tbl.fast, { Scale = 0.95 }):Play()
@@ -420,7 +433,7 @@ return { CreateWindow = function(arg, arg2)
 
 	tbl3.click.Activated:Connect(function()
 		if tbl3.dragged() then return end
-		local v2 = fn(tbl3.click, TweenInfo.new(0.85, Enum.EasingStyle.Quad), { Rotation = 360, Size = UDim2.new(0, 55, 0, 45) })
+		local v2 = fn(tbl3.click, TweenInfo.new(0.85, Enum.EasingStyle.Quad), { Rotation = 360, Size = UDim2.new(0, 42, 0, 42) })
 		v2:Play()
 		v2.Completed:Once(function()
 			tbl3.click.Rotation = 0
@@ -1295,8 +1308,7 @@ return { CreateWindow = function(arg, arg2)
 				Instance.new("UICorner", frame34).CornerRadius = UDim.new(1, 0)
 
 				local default = v4.Default
-				frame33.BackgroundColor3 = default and tbl2.green or tbl2.fg
-				frame33.BackgroundTransparency = default and 0 or 0.88
+				frame33.BackgroundColor3 = default and tbl2.green or tbl2.fg				frame33.BackgroundTransparency = default and 0 or 0.88
 				uiStroke12.Transparency = default and 1 or 0.85
 
 				local function fn10()
