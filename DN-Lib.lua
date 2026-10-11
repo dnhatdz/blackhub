@@ -109,7 +109,7 @@ return { CreateWindow = function(arg, arg2)
 	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 	local imageLabel = Instance.new("ImageLabel", screenGui)
-	imageLabel.Image = "rbxassetid://12359659240"
+	imageLabel.Image = "rbxassetid://8992230677"
 	imageLabel.SliceCenter = Rect.new(99, 99, 99, 99)
 	imageLabel.ScaleType = Enum.ScaleType.Slice
 	imageLabel.ImageColor3 = Color3.new(0, 0, 0)
