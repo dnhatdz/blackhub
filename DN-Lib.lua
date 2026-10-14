@@ -110,6 +110,11 @@ return { CreateWindow = function(arg, arg2)
 		MobileScale = 0.85,
 		MobileSize = UDim2.new(0, 420, 0, 320),
 		AutoScale = true,
+		IslandDefaultSize = UDim2.new(0, 80, 0, 24),
+		IslandExpandedSize = UDim2.new(0, 300, 0, 84),
+		IslandEnabled = true,
+		ToggleDefaultSize = UDim2.new(0, 48, 0, 48),
+		ToggleSize = UDim2.new(0, 48, 0, 48),
 	}, arg2)
 
 	local mobile = isMobile()
@@ -374,7 +379,7 @@ return { CreateWindow = function(arg, arg2)
 	local flag = false
 	local tbl3 = { frame = Instance.new("Frame", screenGui) }
 	tbl3.frame.Name = "FrameToggleUI"
-	tbl3.frame.Size = UDim2.new(0, 60, 0, 60)
+	tbl3.frame.Size = v.ToggleSize
 	tbl3.frame.BackgroundColor3 = Color3.fromRGB(18, 12, 6)
 	tbl3.frame.BackgroundTransparency = 0.1
 	tbl3.frame.BorderSizePixel = 0
@@ -401,7 +406,7 @@ return { CreateWindow = function(arg, arg2)
 
 	tbl3.click = Instance.new("ImageButton", tbl3.frame)
 	tbl3.click.Name = "ClickUI"
-	tbl3.click.Size = UDim2.new(0, 42, 0, 42)
+	tbl3.click.Size = UDim2.new(1, -8, 1, -8)
 	tbl3.click.Image = "rbxassetid://12359659240"
 	tbl3.click.AnchorPoint = Vector2.new(0.5, 0.5)
 	tbl3.click.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -445,7 +450,7 @@ return { CreateWindow = function(arg, arg2)
 
 	tbl3.click.Activated:Connect(function()
 		if tbl3.dragged() then return end
-		local v2 = fn(tbl3.click, TweenInfo.new(0.85, Enum.EasingStyle.Quad), { Rotation = 360, Size = UDim2.new(0, 42, 0, 42) })
+		local v2 = fn(tbl3.click, TweenInfo.new(0.85, Enum.EasingStyle.Quad), { Rotation = 360 })
 		v2:Play()
 		v2.Completed:Once(function()
 			tbl3.click.Rotation = 0
@@ -747,10 +752,11 @@ return { CreateWindow = function(arg, arg2)
 	textButton7.BorderSizePixel = 0
 	textButton7.ZIndex = 500
 	textButton7.AnchorPoint = Vector2.new(0.5, 0)
-	textButton7.Size = UDim2.new(0, 92, 0, 28)
+	textButton7.Size = v.IslandDefaultSize
 	textButton7.Position = UDim2.new(0.5, 0, 0, 10)
 	textButton7.ClipsDescendants = false
 	textButton7.Text = ""
+	textButton7.Visible = v.IslandEnabled
 	Instance.new("UICorner", textButton7).CornerRadius = UDim.new(0, 14)
 
 	local uiStrokeIsland = Instance.new("UIStroke", textButton7)
@@ -769,7 +775,7 @@ return { CreateWindow = function(arg, arg2)
 	local uiListLayout4 = Instance.new("UIListLayout", canvasGroup2)
 	uiListLayout4.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	uiListLayout4.VerticalAlignment = Enum.VerticalAlignment.Center
-	uiListLayout4.Padding = UDim.new(0, 8)
+	uiListLayout4.Padding = UDim.new(0, 6)
 	uiListLayout4.SortOrder = Enum.SortOrder.LayoutOrder
 	uiListLayout4.FillDirection = Enum.FillDirection.Horizontal
 
@@ -777,18 +783,18 @@ return { CreateWindow = function(arg, arg2)
 	frame28.Name = "Glyph"
 	frame28.BackgroundColor3 = Color3.fromRGB(255, 145, 0)
 	frame28.BorderSizePixel = 0
-	frame28.Size = UDim2.new(0, 9, 0, 9)
+	frame28.Size = UDim2.new(0, 8, 0, 8)
 	frame28.LayoutOrder = 1
 	frame28.Visible = true
 	Instance.new("UICorner", frame28).CornerRadius = UDim.new(1, 0)
 
 	local textLabel6 = Instance.new("TextLabel", canvasGroup2)
 	textLabel6.Name = "Label"
-	textLabel6.TextSize = 12
+	textLabel6.TextSize = 11
 	textLabel6.Font = Enum.Font.GothamBold
 	textLabel6.TextColor3 = tbl2.title
 	textLabel6.BackgroundTransparency = 1
-	textLabel6.Size = UDim2.new(0, 0, 0, 16)
+	textLabel6.Size = UDim2.new(0, 0, 0, 14)
 	textLabel6.Text = ""
 	textLabel6.LayoutOrder = 2
 	textLabel6.TextXAlignment = Enum.TextXAlignment.Left
@@ -796,11 +802,11 @@ return { CreateWindow = function(arg, arg2)
 
 	local textLabel7 = Instance.new("TextLabel", canvasGroup2)
 	textLabel7.Name = "Status"
-	textLabel7.TextSize = 12
+	textLabel7.TextSize = 11
 	textLabel7.Font = Enum.Font.GothamBold
 	textLabel7.TextColor3 = tbl2.green
 	textLabel7.BackgroundTransparency = 1
-	textLabel7.Size = UDim2.new(0, 0, 0, 16)
+	textLabel7.Size = UDim2.new(0, 0, 0, 14)
 	textLabel7.Text = ""
 	textLabel7.LayoutOrder = 3
 	textLabel7.TextXAlignment = Enum.TextXAlignment.Left
@@ -810,14 +816,14 @@ return { CreateWindow = function(arg, arg2)
 	local frame29 = Instance.new("Frame", canvasGroup2)
 	frame29.Name = "MiniWave"
 	frame29.BackgroundTransparency = 1
-	frame29.Size = UDim2.new(0, 28, 0, 11)
+	frame29.Size = UDim2.new(0, 24, 0, 10)
 	frame29.LayoutOrder = 4
 	frame29.Visible = true
 
 	local uiListLayout5 = Instance.new("UIListLayout", frame29)
 	uiListLayout5.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	uiListLayout5.VerticalAlignment = Enum.VerticalAlignment.Center
-	uiListLayout5.Padding = UDim.new(0, 3)
+	uiListLayout5.Padding = UDim.new(0, 2)
 	uiListLayout5.SortOrder = Enum.SortOrder.LayoutOrder
 	uiListLayout5.FillDirection = Enum.FillDirection.Horizontal
 
@@ -827,7 +833,7 @@ return { CreateWindow = function(arg, arg2)
 		frame30.Name = "B" .. i
 		frame30.BackgroundColor3 = tbl2.green
 		frame30.BorderSizePixel = 0
-		frame30.Size = UDim2.new(0, 2, 0, math.random(4, 9))
+		frame30.Size = UDim2.new(0, 2, 0, math.random(3, 8))
 		frame30.LayoutOrder = i
 		Instance.new("UICorner", frame30).CornerRadius = UDim.new(1, 0)
 		table.insert(tbl4, frame30)
@@ -845,9 +851,9 @@ return { CreateWindow = function(arg, arg2)
 	frame30.Name = "Thumb"
 	frame30.BackgroundColor3 = Color3.fromRGB(255, 145, 0)
 	frame30.BorderSizePixel = 0
-	frame30.Size = UDim2.new(0, 56, 0, 56)
-	frame30.Position = UDim2.new(0, 18, 0, 18)
-	Instance.new("UICorner", frame30).CornerRadius = UDim.new(0, 14)
+	frame30.Size = UDim2.new(0, 50, 0, 50)
+	frame30.Position = UDim2.new(0, 16, 0, 16)
+	Instance.new("UICorner", frame30).CornerRadius = UDim.new(0, 12)
 
 	local uiGradient8 = Instance.new("UIGradient", frame30)
 	uiGradient8.Rotation = 55
@@ -862,7 +868,7 @@ return { CreateWindow = function(arg, arg2)
 	imageLabel3.ScaleType = Enum.ScaleType.Fit
 	imageLabel3.ImageTransparency = 0.05
 	imageLabel3.AnchorPoint = Vector2.new(0.5, 0.5)
-	imageLabel3.Size = UDim2.new(0, 30, 0, 30)
+	imageLabel3.Size = UDim2.new(0, 26, 0, 26)
 	imageLabel3.Position = UDim2.new(0.5, 0, 0.5, 0)
 	imageLabel3.BackgroundTransparency = 1
 	imageLabel3.Visible = false
@@ -871,32 +877,32 @@ return { CreateWindow = function(arg, arg2)
 	textLabel8.Name = "Mono"
 	textLabel8.Text = "00:00"
 	textLabel8.TextColor3 = tbl2.fg
-	textLabel8.TextSize = 11
+	textLabel8.TextSize = 10
 	textLabel8.Font = Enum.Font.Code
 	textLabel8.BackgroundTransparency = 1
 	textLabel8.Size = UDim2.new(0, 50, 0, 14)
-	textLabel8.Position = UDim2.new(0, 86, 0, 20)
+	textLabel8.Position = UDim2.new(0, 78, 0, 18)
 
 	local textLabel9 = Instance.new("TextLabel", canvasGroup3)
 	textLabel9.Name = "Mark"
 	textLabel9.Text = "● LIVE"
 	textLabel9.TextColor3 = tbl2.red
-	textLabel9.TextSize = 10
+	textLabel9.TextSize = 9
 	textLabel9.Font = Enum.Font.GothamBold
 	textLabel9.BackgroundTransparency = 1
 	textLabel9.Size = UDim2.new(0, 50, 0, 12)
-	textLabel9.Position = UDim2.new(0, 86, 0, 34)
+	textLabel9.Position = UDim2.new(0, 78, 0, 32)
 
 	local textLabel10 = Instance.new("TextLabel", canvasGroup3)
 	textLabel10.Name = "Title"
 	textLabel10.Text = "DN Hub"
 	textLabel10.TextColor3 = tbl2.title
 	textLabel10.TextTransparency = 0.05
-	textLabel10.TextSize = 13
+	textLabel10.TextSize = 12
 	textLabel10.Font = Enum.Font.GothamBold
 	textLabel10.BackgroundTransparency = 1
-	textLabel10.Size = UDim2.new(0, 200, 0, 14)
-	textLabel10.Position = UDim2.new(0, 86, 0, 52)
+	textLabel10.Size = UDim2.new(0, 180, 0, 14)
+	textLabel10.Position = UDim2.new(0, 78, 0, 50)
 	textLabel10.TextXAlignment = Enum.TextXAlignment.Left
 
 	local textLabel11 = Instance.new("TextLabel", canvasGroup3)
@@ -904,18 +910,18 @@ return { CreateWindow = function(arg, arg2)
 	textLabel11.Text = "Running in background"
 	textLabel11.TextColor3 = tbl2.desc
 	textLabel11.TextTransparency = 0.25
-	textLabel11.TextSize = 11
+	textLabel11.TextSize = 10
 	textLabel11.Font = Enum.Font.GothamMedium
 	textLabel11.BackgroundTransparency = 1
-	textLabel11.Size = UDim2.new(0, 200, 0, 12)
-	textLabel11.Position = UDim2.new(0, 86, 0, 67)
+	textLabel11.Size = UDim2.new(0, 180, 0, 12)
+	textLabel11.Position = UDim2.new(0, 78, 0, 63)
 	textLabel11.TextXAlignment = Enum.TextXAlignment.Left
 
 	local frame31 = Instance.new("Frame", canvasGroup3)
 	frame31.Name = "Wave"
 	frame31.BackgroundTransparency = 1
 	frame31.Size = UDim2.new(0, 50, 0, 22)
-	frame31.Position = UDim2.new(1, -60, 0, 40)
+	frame31.Position = UDim2.new(1, -60, 0, 38)
 
 	local uiListLayout6 = Instance.new("UIListLayout", frame31)
 	uiListLayout6.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -946,7 +952,8 @@ return { CreateWindow = function(arg, arg2)
 		flag2 = true
 		flag3 = true
 		canvasGroup3.Visible = true
-		fn(textButton7, tbl.island, { Size = UDim2.new(0, 320, 0, 92) }):Play()
+		local expandedSize = v.IslandSize or v.IslandExpandedSize
+		fn(textButton7, tbl.island, { Size = expandedSize }):Play()
 		fn(v2, tbl.island, { Transparency = 0.3 }):Play()
 		fn(canvasGroup2, tbl.fade, { GroupTransparency = 1 }):Play()
 		task.spawn(function()
@@ -965,7 +972,8 @@ return { CreateWindow = function(arg, arg2)
 		task.spawn(function()
 			task.wait(0.3)
 			canvasGroup3.Visible = false
-			fn(textButton7, tbl.island, { Size = UDim2.new(0, 92, 0, 28) }):Play()
+			local defaultSize = v.IslandSize or v.IslandDefaultSize
+			fn(textButton7, tbl.island, { Size = defaultSize }):Play()
 			fn(v2, tbl.island, { Transparency = 0.5 }):Play()
 			fn(canvasGroup2, tbl.fade, { GroupTransparency = 0 }):Play()
 			task.wait(0.4)
@@ -973,7 +981,45 @@ return { CreateWindow = function(arg, arg2)
 		end)
 	end
 
+	local islandDragged = false
+	local islandPressPosition = nil
+	local islandStartPosition = nil
+
+	textButton7.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			islandDragged = false
+			islandPressPosition = input.Position
+			islandStartPosition = textButton7.Position
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if islandPressPosition and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - islandPressPosition
+			if delta.Magnitude > 6 then
+				islandDragged = true
+			end
+			if islandDragged then
+				textButton7.Position = UDim2.new(
+					islandStartPosition.X.Scale,
+					islandStartPosition.X.Offset + delta.X,
+					islandStartPosition.Y.Scale,
+					islandStartPosition.Y.Offset + delta.Y
+				)
+			end
+		end
+	end)
+
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			islandPressPosition = nil
+			task.wait(0.05)
+			islandDragged = false
+		end
+	end)
+
 	textButton7.MouseButton1Click:Connect(function()
+		if islandDragged then return end
 		if flag2 then fn8() else fn7() end
 	end)
 
@@ -988,7 +1034,7 @@ return { CreateWindow = function(arg, arg2)
 	task.spawn(function()
 		while task.wait(0.25) do
 			for _, v3 in ipairs(tbl4) do
-				fn(v3, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { Size = UDim2.new(0, 2, 0, math.random(4, 9)) }):Play()
+				fn(v3, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { Size = UDim2.new(0, 2, 0, math.random(3, 8)) }):Play()
 			end
 		end
 	end)
@@ -1043,7 +1089,6 @@ return { CreateWindow = function(arg, arg2)
 			textButton.Size = UDim2.new(0, 22, 0, 22)
 			textButton2.Size = UDim2.new(0, 22, 0, 22)
 			textButton3.Size = UDim2.new(0, 22, 0, 22)
-			textButton7.Size = UDim2.new(0, 80, 0, 26)
 			frame19.Size = UDim2.new(1, -30, 1, -40)
 			textLabel5.TextSize = 12
 		else
@@ -1066,7 +1111,6 @@ return { CreateWindow = function(arg, arg2)
 			textButton.Size = UDim2.new(0, 26, 0, 26)
 			textButton2.Size = UDim2.new(0, 26, 0, 26)
 			textButton3.Size = UDim2.new(0, 26, 0, 26)
-			textButton7.Size = UDim2.new(0, 92, 0, 28)
 			frame19.Size = UDim2.new(1, -150, 1, -100)
 			textLabel5.TextSize = 14
 		end
@@ -1114,6 +1158,51 @@ return { CreateWindow = function(arg, arg2)
 		ToggleUI = function()
 			if flag then fn5() else fn4() end
 		end,
+		SetIslandEnabled = function(arg3, enabled)
+			v.IslandEnabled = enabled
+			textButton7.Visible = enabled
+		end,
+		GetIslandEnabled = function()
+			return v.IslandEnabled
+		end,
+		SetIslandDefaultSize = function(arg3, size)
+			if typeof(size) == "UDim2" then
+				v.IslandDefaultSize = size
+				if not flag2 then
+					textButton7.Size = size
+				end
+			end
+		end,
+		SetIslandExpandedSize = function(arg3, size)
+			if typeof(size) == "UDim2" then
+				v.IslandExpandedSize = size
+				if flag2 then
+					textButton7.Size = size
+				end
+			end
+		end,
+		SetIslandSize = function(arg3, size)
+			if size == nil then
+				v.IslandSize = nil
+			elseif typeof(size) == "UDim2" then
+				v.IslandSize = size
+				textButton7.Size = size
+			end
+		end,
+		SetToggleSize = function(arg3, size)
+			if typeof(size) == "UDim2" then
+				v.ToggleSize = size
+				tbl3.frame.Size = size
+			end
+		end,
+		GetIslandPosition = function()
+			return textButton7.Position
+		end,
+		SetIslandPosition = function(arg3, pos)
+			if typeof(pos) == "UDim2" then
+				textButton7.Position = pos
+			end
+		end,
 		SetTask = function(arg3, arg4)
 			local v3 = fn2({ Current = "", Previous = "" }, arg4)
 			str = v3.Current
@@ -1145,15 +1234,17 @@ return { CreateWindow = function(arg, arg2)
 					textLabel7.Visible = false
 				end
 				task.wait(0.05)
+				local defaultSize = v.IslandSize or v.IslandDefaultSize
 				fn(textButton7, tbl.pop, {
-					Size = UDim2.new(0, math.max(92, textLabel6.TextBounds.X + (v3.Status and textLabel7.TextBounds.X + 8 or 0) + 50), 0, 28),
+					Size = UDim2.new(0, math.max(defaultSize.X.Offset, textLabel6.TextBounds.X + (v3.Status and textLabel7.TextBounds.X + 8 or 0) + 44), 0, defaultSize.Y.Offset),
 				}):Play()
 			else
 				textLabel6.Text = ""
 				textLabel7.Visible = false
 				frame28.Visible = true
 				frame29.Visible = true
-				fn(textButton7, tbl.pop, { Size = UDim2.new(0, 92, 0, 28) }):Play()
+				local defaultSize = v.IslandSize or v.IslandDefaultSize
+				fn(textButton7, tbl.pop, { Size = defaultSize }):Play()
 			end
 		end,
 		Notify = function(arg3, arg4)
@@ -1181,8 +1272,9 @@ return { CreateWindow = function(arg, arg2)
 				textLabel7.Visible = false
 			end
 			task.wait(0.05)
+			local defaultSize = v.IslandSize or v.IslandDefaultSize
 			fn(textButton7, tbl.pop, {
-				Size = UDim2.new(0, math.max(92, textLabel6.TextBounds.X + (v3.Status and textLabel7.TextBounds.X + 8 or 0) + 50), 0, 28),
+				Size = UDim2.new(0, math.max(defaultSize.X.Offset, textLabel6.TextBounds.X + (v3.Status and textLabel7.TextBounds.X + 8 or 0) + 44), 0, defaultSize.Y.Offset),
 			}):Play()
 			task.wait(v3.Duration)
 			fn(textLabel6, tbl.fade, { TextTransparency = 1 }):Play()
@@ -1190,7 +1282,7 @@ return { CreateWindow = function(arg, arg2)
 				fn(textLabel7, tbl.fade, { TextTransparency = 1 }):Play()
 			end
 			task.wait(0.3)
-			fn(textButton7, tbl.pop, { Size = UDim2.new(0, 92, 0, 28) }):Play()
+			fn(textButton7, tbl.pop, { Size = defaultSize }):Play()
 			task.wait(0.2)
 			textLabel6.Text = ""
 			textLabel6.TextTransparency = 0
