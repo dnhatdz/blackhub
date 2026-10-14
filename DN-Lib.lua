@@ -1,7 +1,6 @@
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local GuiService = game:GetService("GuiService")
 
 local tbl = {
 	spring = TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
@@ -952,8 +951,7 @@ return { CreateWindow = function(arg, arg2)
 		flag2 = true
 		flag3 = true
 		canvasGroup3.Visible = true
-		local expandedSize = v.IslandSize or v.IslandExpandedSize
-		fn(textButton7, tbl.island, { Size = expandedSize }):Play()
+		fn(textButton7, tbl.island, { Size = v.IslandExpandedSize }):Play()
 		fn(v2, tbl.island, { Transparency = 0.3 }):Play()
 		fn(canvasGroup2, tbl.fade, { GroupTransparency = 1 }):Play()
 		task.spawn(function()
@@ -972,8 +970,7 @@ return { CreateWindow = function(arg, arg2)
 		task.spawn(function()
 			task.wait(0.3)
 			canvasGroup3.Visible = false
-			local defaultSize = v.IslandSize or v.IslandDefaultSize
-			fn(textButton7, tbl.island, { Size = defaultSize }):Play()
+			fn(textButton7, tbl.island, { Size = v.IslandDefaultSize }):Play()
 			fn(v2, tbl.island, { Transparency = 0.5 }):Play()
 			fn(canvasGroup2, tbl.fade, { GroupTransparency = 0 }):Play()
 			task.wait(0.4)
@@ -1068,29 +1065,72 @@ return { CreateWindow = function(arg, arg2)
 		local viewport = getViewportSize()
 		local isSmall = viewport.X < 900 or viewport.Y < 600
 		if mobile or isSmall then
-			local w = math.clamp(viewport.X * 0.9, 300, 480)
-			local h = math.clamp(viewport.Y * 0.75, 260, 380)
+			local w = math.clamp(viewport.X * 0.92, 320, 520)
+			local h = math.clamp(viewport.Y * 0.78, 280, 420)
 			imageLabel.Size = UDim2.new(0, w, 0, h)
-			uiScale.Scale = math.clamp(math.min(viewport.X / 750, viewport.Y / 500), 0.55, 0.85)
-			frame.Size = UDim2.new(1, -30, 1, -30)
-			frame6.Size = UDim2.new(1, -100, 0, 70)
-			frame6.Position = UDim2.new(0, 100, 0, 0)
-			frame16.Size = UDim2.new(0, 100, 1, -72)
-			frame17.Size = UDim2.new(1, -100, 1, -72)
-			frame17.Position = UDim2.new(0, 100, 0, 71)
-			imageLabel2.Position = UDim2.new(0, 99, 0, 0)
-			frame15.Position = UDim2.new(0, 0, 0, 70)
-			textLabel.TextSize = 12
+			uiScale.Scale = math.clamp(math.min(viewport.X / 750, viewport.Y / 500), 0.6, 0.9)
+
+			frame.Size = UDim2.new(1, -20, 1, -20)
+			frame6.Position = UDim2.new(0, 86, 0, 0)
+			frame6.Size = UDim2.new(1, -86, 0, 62)
+			frame15.Position = UDim2.new(0, 0, 0, 62)
+			frame16.Position = UDim2.new(0, 0, 0, 63)
+			frame16.Size = UDim2.new(0, 86, 1, -63)
+			frame17.Position = UDim2.new(0, 86, 0, 63)
+			frame17.Size = UDim2.new(1, -86, 1, -63)
+			imageLabel2.Position = UDim2.new(0, 85, 0, 0)
+
+			frame3.Size = UDim2.new(0, 9, 0, 9)
+			frame3.Position = UDim2.new(0, 10, 0, 14)
+			frame4.Size = UDim2.new(0, 9, 0, 9)
+			frame4.Position = UDim2.new(0, 25, 0, 14)
+			frame5.Size = UDim2.new(0, 9, 0, 9)
+			frame5.Position = UDim2.new(0, 40, 0, 14)
+
+			textLabel.TextSize = 11
+			textLabel.Size = UDim2.new(1, -12, 0, 14)
+			textLabel.Position = UDim2.new(0, 10, 0, 34)
 			textLabel2.TextSize = 9
-			frame7.Size = UDim2.new(0, 70, 0, 20)
-			frame8.Size = UDim2.new(0, 70, 0, 20)
-			frame9.Size = UDim2.new(0, 120, 0, 40)
-			frame9.Position = UDim2.new(1, -125, 0.5, 0)
-			textButton.Size = UDim2.new(0, 22, 0, 22)
-			textButton2.Size = UDim2.new(0, 22, 0, 22)
-			textButton3.Size = UDim2.new(0, 22, 0, 22)
-			frame19.Size = UDim2.new(1, -30, 1, -40)
+			textLabel2.Size = UDim2.new(1, -12, 0, 12)
+			textLabel2.Position = UDim2.new(0, 10, 0, 48)
+
+			frame7.Size = UDim2.new(0, 64, 0, 20)
+			frame7.Position = UDim2.new(0, 10, 0.28, 0)
+			textLabel3.TextSize = 9
+			frame8.Size = UDim2.new(0, 64, 0, 20)
+			frame8.Position = UDim2.new(0, 10, 0.72, 0)
+			textLabel4.TextSize = 9
+
+			frame9.Size = UDim2.new(0, 96, 0, 34)
+			frame9.Position = UDim2.new(1, -100, 0.5, 0)
+			uiListLayout.Padding = UDim.new(0, 5)
+			textButton.Size = UDim2.new(0, 24, 0, 24)
+			textButton2.Size = UDim2.new(0, 24, 0, 24)
+			textButton3.Size = UDim2.new(0, 24, 0, 24)
+
+			scrollingFrame.ScrollBarThickness = 2
+			uiPadding.PaddingTop = UDim.new(0, 6)
+			uiPadding.PaddingBottom = UDim.new(0, 6)
+			uiPadding.PaddingLeft = UDim.new(0, 5)
+			uiPadding.PaddingRight = UDim.new(0, 5)
+			uiListLayout2.Padding = UDim.new(0, 3)
+
+			frame19.Size = UDim2.new(1, -20, 1, -30)
 			textLabel5.TextSize = 12
+			textLabel5.Size = UDim2.new(1, -90, 0, 16)
+			textLabel5.Position = UDim2.new(0, 62, 0, 12)
+			frame20.Size = UDim2.new(0, 9, 0, 9)
+			frame20.Position = UDim2.new(0, 12, 0, 15)
+			frame21.Size = UDim2.new(0, 9, 0, 9)
+			frame21.Position = UDim2.new(0, 27, 0, 15)
+			frame22.Size = UDim2.new(0, 9, 0, 9)
+			frame22.Position = UDim2.new(0, 42, 0, 15)
+			textButton5.Size = UDim2.new(0, 24, 0, 24)
+			textButton5.Position = UDim2.new(1, -30, 0, 10)
+			scrollingFrame2.Size = UDim2.new(1, -20, 1, -56)
+			scrollingFrame2.Position = UDim2.new(0, 10, 0, 42)
+			textButton6.Size = UDim2.new(1, 0, 0, 32)
+			textButton6.TextSize = 12
 		else
 			imageLabel.Size = v.Size
 			uiScale.Scale = 0.95
@@ -1098,21 +1138,165 @@ return { CreateWindow = function(arg, arg2)
 			frame6.Size = UDim2.new(1, -183, 0, 85)
 			frame6.Position = UDim2.new(0, 180, 0, 0)
 			frame16.Size = UDim2.new(0, 179, 1, -87)
+			frame16.Position = UDim2.new(0, 0, 0, 86)
 			frame17.Size = UDim2.new(1, -180, 1, -87)
 			frame17.Position = UDim2.new(0, 180, 0, 86)
 			imageLabel2.Position = UDim2.new(0, 179, 0, 0)
 			frame15.Position = UDim2.new(0, 0, 0, 85)
 			textLabel.TextSize = 14
+			textLabel.Size = UDim2.new(1, -20, 0, 18)
+			textLabel.Position = UDim2.new(0, 18, 0, 48)
 			textLabel2.TextSize = 11
+			textLabel2.Size = UDim2.new(1, -20, 0, 14)
+			textLabel2.Position = UDim2.new(0, 18, 0, 66)
+			frame3.Size = UDim2.new(0, 12, 0, 12)
+			frame3.Position = UDim2.new(0, 18, 0, 20)
+			frame4.Size = UDim2.new(0, 12, 0, 12)
+			frame4.Position = UDim2.new(0, 38, 0, 20)
+			frame5.Size = UDim2.new(0, 12, 0, 12)
+			frame5.Position = UDim2.new(0, 58, 0, 20)
 			frame7.Size = UDim2.new(0, 95, 0, 25)
+			frame7.Position = UDim2.new(0, 20, 0.25, 0)
+			textLabel3.TextSize = 10
 			frame8.Size = UDim2.new(0, 95, 0, 25)
+			frame8.Position = UDim2.new(0, 20, 0.65, 0)
+			textLabel4.TextSize = 10
 			frame9.Size = UDim2.new(0, 190, 0, 45)
 			frame9.Position = UDim2.new(1, -200, 0.5, 0)
+			uiListLayout.Padding = UDim.new(0, 8)
 			textButton.Size = UDim2.new(0, 26, 0, 26)
 			textButton2.Size = UDim2.new(0, 26, 0, 26)
 			textButton3.Size = UDim2.new(0, 26, 0, 26)
+			scrollingFrame.ScrollBarThickness = 3
+			uiPadding.PaddingTop = UDim.new(0, 8)
+			uiPadding.PaddingBottom = UDim.new(0, 8)
+			uiPadding.PaddingLeft = UDim.new(0, 8)
+			uiPadding.PaddingRight = UDim.new(0, 8)
+			uiListLayout2.Padding = UDim.new(0, 4)
 			frame19.Size = UDim2.new(1, -150, 1, -100)
 			textLabel5.TextSize = 14
+			textLabel5.Size = UDim2.new(1, -150, 0, 20)
+			textLabel5.Position = UDim2.new(0, 85, 0, 15)
+			frame20.Size = UDim2.new(0, 12, 0, 12)
+			frame20.Position = UDim2.new(0, 18, 0, 20)
+			frame21.Size = UDim2.new(0, 12, 0, 12)
+			frame21.Position = UDim2.new(0, 38, 0, 20)
+			frame22.Size = UDim2.new(0, 12, 0, 12)
+			frame22.Position = UDim2.new(0, 58, 0, 20)
+			textButton5.Size = UDim2.new(0, 26, 0, 26)
+			textButton5.Position = UDim2.new(1, -36, 0, 12)
+			scrollingFrame2.Size = UDim2.new(1, -40, 1, -70)
+			scrollingFrame2.Position = UDim2.new(0, 20, 0, 50)
+			textButton6.Size = UDim2.new(1, 0, 0, 34)
+			textButton6.TextSize = 13
+		end
+	end
+
+	local function applyElementMobileLayout(element, tab)
+		if not (mobile or getViewportSize().X < 900) then return end
+		local isMobileLayout = true
+
+		local function layoutTextBlock(frame32, hasDesc, height)
+			if not frame32 then return end
+			frame32.Position = UDim2.new(0, 10, 0.5, 0)
+			frame32.Size = UDim2.new(1, -100, 0, hasDesc and 36 or 24)
+			local title = frame32:FindFirstChild("Title")
+			if title then
+				title.TextSize = 11
+				title.Size = UDim2.new(1, 0, 0, 12)
+			end
+			local desc = frame32:FindFirstChild("Desc")
+			if desc then
+				desc.TextSize = 10
+				desc.Size = UDim2.new(1, 0, 0, 20)
+				desc.Position = UDim2.new(0, 0, 0, 13)
+			end
+		end
+
+		if element.Name == "Toggle" or element.Name == "Button" or element.Name == "Slider" or element.Name == "Keybind" then
+			local tb = element:FindFirstChild("TextBlock")
+			if tb then
+				local hasDesc = tb:FindFirstChild("Desc") ~= nil
+				if element.Name == "Slider" then
+					tb.Size = UDim2.new(1, -120, 0, hasDesc and 36 or 24)
+					tb.Position = UDim2.new(0, 10, 0.5, 0)
+					local title = tb:FindFirstChild("Title")
+					if title then title.TextSize = 11 end
+					local desc = tb:FindFirstChild("Desc")
+					if desc then desc.TextSize = 10 end
+					local vt = element:FindFirstChild("ValueText")
+					if vt then
+						vt.TextSize = 10
+						vt.Size = UDim2.new(0, 44, 0, 12)
+						vt.Position = UDim2.new(1, -10, 0.5, -4)
+					end
+					local track = element:FindFirstChild("Track")
+					if track then
+						track.Size = UDim2.new(0, 100, 0, 5)
+						track.Position = UDim2.new(1, -10, 0.5, 5)
+					end
+				elseif element.Name == "Keybind" then
+					tb.Size = UDim2.new(1, -80, 0, 24)
+					tb.Position = UDim2.new(0, 10, 0.5, 0)
+					local title = tb:FindFirstChild("Title")
+					if title then title.TextSize = 11 end
+					local desc = tb:FindFirstChild("Desc")
+					if desc then
+						desc.TextSize = 10
+						desc.Position = UDim2.new(0, 0, 0, 13)
+					end
+					local pill = element:FindFirstChild("Pill")
+					if pill then
+						pill.Size = UDim2.new(0, 50, 0, 21)
+						pill.Position = UDim2.new(1, -10, 0.5, 0)
+						local key = pill:FindFirstChild("Key")
+						if key then key.TextSize = 10 end
+					end
+				else
+					layoutTextBlock(tb, hasDesc)
+				end
+			end
+
+			if element.Name == "Toggle" then
+				local sw = element:FindFirstChild("Switch")
+				if sw then
+					sw.Size = UDim2.new(0, 30, 0, 17)
+					sw.Position = UDim2.new(1, -10, 0.5, 0)
+					local knob = sw:FindFirstChild("Knob")
+					if knob then
+						knob.Size = UDim2.new(0, 13, 0, 13)
+					end
+				end
+			end
+		elseif element.Name == "Dropdown" or element.Name == "Textbox" then
+			local tb = element:FindFirstChild("TextBlock")
+			if tb then
+				local hasDesc = tb:FindFirstChild("Desc") ~= nil
+				tb.Position = UDim2.new(0, 10, 0, 7)
+				tb.Size = UDim2.new(1, -20, 0, hasDesc and 36 or 24)
+				local title = tb:FindFirstChild("Title")
+				if title then title.TextSize = 11 end
+				local desc = tb:FindFirstChild("Desc")
+				if desc then
+					desc.TextSize = 10
+					desc.Position = UDim2.new(0, 0, 0, 13)
+				end
+			end
+			local field = element:FindFirstChild("Field")
+			if field then
+				field.Size = UDim2.new(1, -20, 0, 28)
+				field.Position = UDim2.new(0, 10, 1, -35)
+				local selected = field:FindFirstChild("Selected")
+				if selected then
+					selected.TextSize = 11
+					selected.Size = UDim2.new(1, -30, 1, 0)
+					selected.Position = UDim2.new(0, 9, 0, 0)
+				end
+				local box = field:FindFirstChild("Box")
+				if box then
+					box.TextSize = 11
+				end
+			end
 		end
 	end
 
@@ -1181,14 +1365,6 @@ return { CreateWindow = function(arg, arg2)
 				end
 			end
 		end,
-		SetIslandSize = function(arg3, size)
-			if size == nil then
-				v.IslandSize = nil
-			elseif typeof(size) == "UDim2" then
-				v.IslandSize = size
-				textButton7.Size = size
-			end
-		end,
 		SetToggleSize = function(arg3, size)
 			if typeof(size) == "UDim2" then
 				v.ToggleSize = size
@@ -1234,7 +1410,7 @@ return { CreateWindow = function(arg, arg2)
 					textLabel7.Visible = false
 				end
 				task.wait(0.05)
-				local defaultSize = v.IslandSize or v.IslandDefaultSize
+				local defaultSize = v.IslandDefaultSize
 				fn(textButton7, tbl.pop, {
 					Size = UDim2.new(0, math.max(defaultSize.X.Offset, textLabel6.TextBounds.X + (v3.Status and textLabel7.TextBounds.X + 8 or 0) + 44), 0, defaultSize.Y.Offset),
 				}):Play()
@@ -1243,8 +1419,7 @@ return { CreateWindow = function(arg, arg2)
 				textLabel7.Visible = false
 				frame28.Visible = true
 				frame29.Visible = true
-				local defaultSize = v.IslandSize or v.IslandDefaultSize
-				fn(textButton7, tbl.pop, { Size = defaultSize }):Play()
+				fn(textButton7, tbl.pop, { Size = v.IslandDefaultSize }):Play()
 			end
 		end,
 		Notify = function(arg3, arg4)
@@ -1272,7 +1447,7 @@ return { CreateWindow = function(arg, arg2)
 				textLabel7.Visible = false
 			end
 			task.wait(0.05)
-			local defaultSize = v.IslandSize or v.IslandDefaultSize
+			local defaultSize = v.IslandDefaultSize
 			fn(textButton7, tbl.pop, {
 				Size = UDim2.new(0, math.max(defaultSize.X.Offset, textLabel6.TextBounds.X + (v3.Status and textLabel7.TextBounds.X + 8 or 0) + 44), 0, defaultSize.Y.Offset),
 			}):Play()
@@ -1297,6 +1472,7 @@ return { CreateWindow = function(arg, arg2)
 		AddTab = function(arg3, arg4)
 			local v3 = fn2({ Title = "Tab", Icon = "" }, arg4)
 			local layoutOrder = #arg3._tabs + 1
+			local isSmallScreen = mobile or getViewportSize().X < 900
 
 			local textButton8 = Instance.new("TextButton", arg3._tabScroll)
 			textButton8.Name = "Tab" .. layoutOrder
@@ -1304,11 +1480,11 @@ return { CreateWindow = function(arg, arg2)
 			textButton8.BackgroundColor3 = Color3.fromRGB(255, 145, 0)
 			textButton8.BackgroundTransparency = 1
 			textButton8.BorderSizePixel = 0
-			textButton8.Size = UDim2.new(1, 0, 0, 39)
+			textButton8.Size = UDim2.new(1, 0, 0, isSmallScreen and 34 or 39)
 			textButton8.Text = ""
 			textButton8.AutoButtonColor = false
 			textButton8.Selectable = false
-			Instance.new("UICorner", textButton8).CornerRadius = UDim.new(0, 12)
+			Instance.new("UICorner", textButton8).CornerRadius = UDim.new(0, 10)
 
 			local uiStroke10 = Instance.new("UIStroke", textButton8)
 			uiStroke10.Color = Color3.fromRGB(255, 145, 0)
@@ -1320,8 +1496,8 @@ return { CreateWindow = function(arg, arg2)
 			imageLabel4.Name = "Icon"
 			imageLabel4.BackgroundTransparency = 1
 			imageLabel4.AnchorPoint = Vector2.new(0, 0.5)
-			imageLabel4.Size = UDim2.new(0, 20, 0, 20)
-			imageLabel4.Position = UDim2.new(0, 10, 0.5, 0)
+			imageLabel4.Size = UDim2.new(0, isSmallScreen and 16 or 20, 0, isSmallScreen and 16 or 20)
+			imageLabel4.Position = UDim2.new(0, isSmallScreen and 7 or 10, 0.5, 0)
 			imageLabel4.Image = v3.Icon
 			imageLabel4.ImageTransparency = 0.5
 			imageLabel4.ImageColor3 = Color3.fromRGB(255, 180, 60)
@@ -1331,12 +1507,12 @@ return { CreateWindow = function(arg, arg2)
 			textLabel12.Text = v3.Title
 			textLabel12.TextColor3 = tbl2.title
 			textLabel12.TextTransparency = 0.5
-			textLabel12.TextSize = 12
+			textLabel12.TextSize = isSmallScreen and 10 or 12
 			textLabel12.Font = Enum.Font.GothamBold
 			textLabel12.BackgroundTransparency = 1
 			textLabel12.AnchorPoint = Vector2.new(0, 0.5)
-			textLabel12.Size = UDim2.new(1, -40, 1, 0)
-			textLabel12.Position = UDim2.new(0, 40, 0.5, 0)
+			textLabel12.Size = UDim2.new(1, isSmallScreen and -30 or -40, 1, 0)
+			textLabel12.Position = UDim2.new(0, isSmallScreen and 28 or 40, 0.5, 0)
 			textLabel12.TextXAlignment = Enum.TextXAlignment.Left
 
 			local scrollingFrame3 = Instance.new("ScrollingFrame", arg3._window:FindFirstChild("Layout").RealLayout)
@@ -1351,13 +1527,13 @@ return { CreateWindow = function(arg, arg2)
 			scrollingFrame3.ScrollBarImageTransparency = 0.65
 
 			local uiPadding4 = Instance.new("UIPadding", scrollingFrame3)
-			uiPadding4.PaddingTop = UDim.new(0, 8)
-			uiPadding4.PaddingRight = UDim.new(0, 8)
-			uiPadding4.PaddingLeft = UDim.new(0, 8)
-			uiPadding4.PaddingBottom = UDim.new(0, 8)
+			uiPadding4.PaddingTop = UDim.new(0, isSmallScreen and 6 or 8)
+			uiPadding4.PaddingRight = UDim.new(0, isSmallScreen and 5 or 8)
+			uiPadding4.PaddingLeft = UDim.new(0, isSmallScreen and 5 or 8)
+			uiPadding4.PaddingBottom = UDim.new(0, isSmallScreen and 6 or 8)
 
 			local uiListLayout7 = Instance.new("UIListLayout", scrollingFrame3)
-			uiListLayout7.Padding = UDim.new(0, 6)
+			uiListLayout7.Padding = UDim.new(0, isSmallScreen and 4 or 6)
 			uiListLayout7.SortOrder = Enum.SortOrder.LayoutOrder
 
 			local tbl6 = {
@@ -1495,6 +1671,10 @@ return { CreateWindow = function(arg, arg2)
 
 				textButton9.MouseButton1Click:Connect(fn10)
 
+				if isSmallScreen then
+					applyElementMobileLayout(textButton9, arg5)
+				end
+
 				return {
 					Value = default,
 					SetValue = function(arg7, arg8)
@@ -1603,6 +1783,10 @@ return { CreateWindow = function(arg, arg2)
 					fn(textButton9, tbl.fade, { BackgroundTransparency = 0.92 }):Play()
 					pcall(v4.Callback)
 				end)
+
+				if isSmallScreen then
+					applyElementMobileLayout(textButton9, arg5)
+				end
 			end
 
 			tbl6.AddLabel = function(arg5, arg6)
@@ -1618,7 +1802,7 @@ return { CreateWindow = function(arg, arg2)
 				textLabel13.Text = v4.Title
 				textLabel13.TextColor3 = tbl2.title
 				textLabel13.TextTransparency = 0.08
-				textLabel13.TextSize = 12
+				textLabel13.TextSize = isSmallScreen and 11 or 12
 				textLabel13.Font = Enum.Font.GothamBold
 				textLabel13.BackgroundTransparency = 1
 				textLabel13.Size = UDim2.new(1, 0, 1, 0)
@@ -1648,11 +1832,11 @@ return { CreateWindow = function(arg, arg2)
 				textLabel13.Text = v4.Title
 				textLabel13.TextColor3 = tbl2.title
 				textLabel13.TextTransparency = 0.08
-				textLabel13.TextSize = 12
+				textLabel13.TextSize = isSmallScreen and 11 or 12
 				textLabel13.Font = Enum.Font.GothamBold
 				textLabel13.BackgroundTransparency = 1
-				textLabel13.Position = UDim2.new(0, 11, 0, 9)
-				textLabel13.Size = UDim2.new(1, -22, 0, 12)
+				textLabel13.Position = UDim2.new(0, isSmallScreen and 9 or 11, 0, 9)
+				textLabel13.Size = UDim2.new(1, isSmallScreen and -18 or -22, 0, 12)
 				textLabel13.TextXAlignment = Enum.TextXAlignment.Left
 				textLabel13.TextYAlignment = Enum.TextYAlignment.Top
 				textLabel13.TextWrapped = true
@@ -1662,11 +1846,11 @@ return { CreateWindow = function(arg, arg2)
 				textLabel14.Text = v4.Content
 				textLabel14.TextColor3 = tbl2.desc
 				textLabel14.TextTransparency = 0.2
-				textLabel14.TextSize = 11
+				textLabel14.TextSize = isSmallScreen and 10 or 11
 				textLabel14.Font = Enum.Font.Gotham
 				textLabel14.BackgroundTransparency = 1
-				textLabel14.Position = UDim2.new(0, 11, 0, 23)
-				textLabel14.Size = UDim2.new(1, -22, 1, -27)
+				textLabel14.Position = UDim2.new(0, isSmallScreen and 9 or 11, 0, 23)
+				textLabel14.Size = UDim2.new(1, isSmallScreen and -18 or -22, 1, -27)
 				textLabel14.TextXAlignment = Enum.TextXAlignment.Left
 				textLabel14.TextYAlignment = Enum.TextYAlignment.Top
 				textLabel14.TextWrapped = true
@@ -1686,10 +1870,10 @@ return { CreateWindow = function(arg, arg2)
 					textLabel13.Text = v4.Title
 					textLabel13.TextColor3 = Color3.fromRGB(255, 180, 60)
 					textLabel13.TextTransparency = 0.3
-					textLabel13.TextSize = 10
+					textLabel13.TextSize = isSmallScreen and 9 or 10
 					textLabel13.Font = Enum.Font.GothamBold
 					textLabel13.BackgroundTransparency = 1
-					textLabel13.Size = UDim2.new(0, 108, 0, 11)
+					textLabel13.Size = UDim2.new(0, isSmallScreen and 80 or 108, 0, 11)
 					textLabel13.Position = UDim2.new(0, 0, 0.5, -5)
 					textLabel13.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -1697,8 +1881,8 @@ return { CreateWindow = function(arg, arg2)
 					frame33.BackgroundColor3 = Color3.fromRGB(255, 145, 0)
 					frame33.BackgroundTransparency = 0.7
 					frame33.BorderSizePixel = 0
-					frame33.Size = UDim2.new(1, -117, 0, 1)
-					frame33.Position = UDim2.new(0, 117, 0.5, 0)
+					frame33.Size = UDim2.new(1, isSmallScreen and -88 or -117, 0, 1)
+					frame33.Position = UDim2.new(0, isSmallScreen and 88 or 117, 0.5, 0)
 				else
 					local frame33 = Instance.new("Frame", frame32)
 					frame33.BackgroundColor3 = Color3.fromRGB(255, 145, 0)
@@ -1848,6 +2032,10 @@ return { CreateWindow = function(arg, arg2)
 						fn10(input)
 					end
 				end)
+
+				if isSmallScreen then
+					applyElementMobileLayout(textButton9, arg5)
+				end
 
 				return {
 					Value = default,
@@ -2087,6 +2275,10 @@ return { CreateWindow = function(arg, arg2)
 					end
 				end)
 
+				if isSmallScreen then
+					applyElementMobileLayout(textButton9, arg5)
+				end
+
 				return {
 					Value = default,
 					SetValue = function(arg7, arg8)
@@ -2212,6 +2404,10 @@ return { CreateWindow = function(arg, arg2)
 					end
 				end)
 
+				if isSmallScreen then
+					applyElementMobileLayout(textButton9, arg5)
+				end
+
 				return {
 					Value = textBox.Text,
 					SetValue = function(arg7, text)
@@ -2335,6 +2531,10 @@ return { CreateWindow = function(arg, arg2)
 						pcall(v4.Callback, default)
 					end
 				end)
+
+				if isSmallScreen then
+					applyElementMobileLayout(textButton9, arg5)
+				end
 
 				return {
 					Value = default,
