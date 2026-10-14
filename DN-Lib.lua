@@ -1,11 +1,7 @@
--- ----------------------------------------------------
--- DNHub UI Library
--- Author: DNCrack(DN)
--- ----------------------------------------------------
-
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local GuiService = game:GetService("GuiService")
 
 local tbl = {
 	spring = TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
@@ -90,6 +86,18 @@ local function fn3(arg, arg2)
 	end
 end
 
+local function isMobile()
+	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+end
+
+local function getViewportSize()
+	local camera = workspace.CurrentCamera
+	if camera then
+		return camera.ViewportSize
+	end
+	return Vector2.new(1920, 1080)
+end
+
 return { CreateWindow = function(arg, arg2)
 	local v = fn2({
 		Title = "DN Hub",
@@ -99,8 +107,12 @@ return { CreateWindow = function(arg, arg2)
 		MinimizeKey = Enum.KeyCode.RightControl,
 		Game = "",
 		Version = "",
+		MobileScale = 0.85,
+		MobileSize = UDim2.new(0, 420, 0, 320),
+		AutoScale = true,
 	}, arg2)
 
+	local mobile = isMobile()
 	local screenGui = Instance.new("ScreenGui")
 	screenGui.Name = "DNHubUI"
 	screenGui.IgnoreGuiInset = true
@@ -117,10 +129,10 @@ return { CreateWindow = function(arg, arg2)
 	imageLabel.BackgroundTransparency = 1
 	imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 	imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-	imageLabel.Size = v.Size
+	imageLabel.Size = mobile and v.MobileSize or v.Size
 
 	local uiScale = Instance.new("UIScale", imageLabel)
-	uiScale.Scale = 0.95
+	uiScale.Scale = mobile and v.MobileScale or 0.95
 
 	local frame = Instance.new("Frame", imageLabel)
 	frame.Name = "Window"
@@ -403,7 +415,7 @@ return { CreateWindow = function(arg, arg2)
 	Instance.new("UICorner", tbl3.click).CornerRadius = UDim.new(1, 0)
 
 	textButton3.MouseButton1Click:Connect(function()
-		fn(uiScale, tbl.fast, { Scale = 0.95 }):Play()
+		fn(uiScale, tbl.fast, { Scale = mobile and v.MobileScale or 0.95 }):Play()
 		fn(imageLabel, tbl.fade, { ImageTransparency = 1 }):Play()
 		task.wait(0.35)
 		screenGui:Destroy()
@@ -412,7 +424,7 @@ return { CreateWindow = function(arg, arg2)
 	local function fn4()
 		if flag then return end
 		flag = true
-		fn(uiScale, tbl.fast, { Scale = 0.85 }):Play()
+		fn(uiScale, tbl.fast, { Scale = mobile and v.MobileScale - 0.1 or 0.85 }):Play()
 		fn(imageLabel, tbl.fade, { ImageTransparency = 1 }):Play()
 		task.wait(0.25)
 		imageLabel.Visible = false
@@ -424,7 +436,7 @@ return { CreateWindow = function(arg, arg2)
 		flag = false
 		tbl3.frame.Visible = false
 		imageLabel.Visible = true
-		fn(uiScale, tbl.pop, { Scale = 1 }):Play()
+		fn(uiScale, tbl.pop, { Scale = mobile and v.MobileScale or 1 }):Play()
 		fn(imageLabel, tbl.fade, { ImageTransparency = 0.4 }):Play()
 	end
 
@@ -1006,8 +1018,77 @@ return { CreateWindow = function(arg, arg2)
 		end
 	end)
 
+	local function applyResponsiveSize()
+		local viewport = getViewportSize()
+		local isSmall = viewport.X < 900 or viewport.Y < 600
+		if mobile or isSmall then
+			local w = math.clamp(viewport.X * 0.9, 300, 480)
+			local h = math.clamp(viewport.Y * 0.75, 260, 380)
+			imageLabel.Size = UDim2.new(0, w, 0, h)
+			uiScale.Scale = math.clamp(math.min(viewport.X / 750, viewport.Y / 500), 0.55, 0.85)
+			frame.Size = UDim2.new(1, -30, 1, -30)
+			frame6.Size = UDim2.new(1, -100, 0, 70)
+			frame6.Position = UDim2.new(0, 100, 0, 0)
+			frame16.Size = UDim2.new(0, 100, 1, -72)
+			frame17.Size = UDim2.new(1, -100, 1, -72)
+			frame17.Position = UDim2.new(0, 100, 0, 71)
+			imageLabel2.Position = UDim2.new(0, 99, 0, 0)
+			frame15.Position = UDim2.new(0, 0, 0, 70)
+			textLabel.TextSize = 12
+			textLabel2.TextSize = 9
+			frame7.Size = UDim2.new(0, 70, 0, 20)
+			frame8.Size = UDim2.new(0, 70, 0, 20)
+			frame9.Size = UDim2.new(0, 120, 0, 40)
+			frame9.Position = UDim2.new(1, -125, 0.5, 0)
+			textButton.Size = UDim2.new(0, 22, 0, 22)
+			textButton2.Size = UDim2.new(0, 22, 0, 22)
+			textButton3.Size = UDim2.new(0, 22, 0, 22)
+			textButton7.Size = UDim2.new(0, 80, 0, 26)
+			frame19.Size = UDim2.new(1, -30, 1, -40)
+			textLabel5.TextSize = 12
+		else
+			imageLabel.Size = v.Size
+			uiScale.Scale = 0.95
+			frame.Size = UDim2.new(1, -120, 1, -120)
+			frame6.Size = UDim2.new(1, -183, 0, 85)
+			frame6.Position = UDim2.new(0, 180, 0, 0)
+			frame16.Size = UDim2.new(0, 179, 1, -87)
+			frame17.Size = UDim2.new(1, -180, 1, -87)
+			frame17.Position = UDim2.new(0, 180, 0, 86)
+			imageLabel2.Position = UDim2.new(0, 179, 0, 0)
+			frame15.Position = UDim2.new(0, 0, 0, 85)
+			textLabel.TextSize = 14
+			textLabel2.TextSize = 11
+			frame7.Size = UDim2.new(0, 95, 0, 25)
+			frame8.Size = UDim2.new(0, 95, 0, 25)
+			frame9.Size = UDim2.new(0, 190, 0, 45)
+			frame9.Position = UDim2.new(1, -200, 0.5, 0)
+			textButton.Size = UDim2.new(0, 26, 0, 26)
+			textButton2.Size = UDim2.new(0, 26, 0, 26)
+			textButton3.Size = UDim2.new(0, 26, 0, 26)
+			textButton7.Size = UDim2.new(0, 92, 0, 28)
+			frame19.Size = UDim2.new(1, -150, 1, -100)
+			textLabel5.TextSize = 14
+		end
+	end
+
+	applyResponsiveSize()
+
+	local conn
+	conn = workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		if v.AutoScale then
+			applyResponsiveSize()
+		end
+	end)
+
+	screenGui.AncestryChanged:Connect(function()
+		if not screenGui.Parent then
+			if conn then conn:Disconnect() end
+		end
+	end)
+
 	screenGui.Parent = v.Parent
-	fn(uiScale, tbl.spring, { Scale = 1 }):Play()
+	fn(uiScale, tbl.spring, { Scale = mobile and v.MobileScale or 1 }):Play()
 	fn(imageLabel, tbl.soft, { ImageTransparency = 0.4 }):Play()
 
 	return {
@@ -1029,6 +1110,7 @@ return { CreateWindow = function(arg, arg2)
 		_islandMark = textLabel9,
 		_mobileToggle = tbl3.frame,
 		_clickUI = tbl3.click,
+		ApplyResponsive = applyResponsiveSize,
 		ToggleUI = function()
 			if flag then fn5() else fn4() end
 		end,
