@@ -2294,6 +2294,23 @@ return { CreateWindow = function(arg, arg2)
 						end
 						fn10()
 					end,
+					RefreshOptions = function(arg7, newOptions, newDefault)
+						if type(newOptions) ~= "table" then return end
+						v4.Options = newOptions
+						if newDefault ~= nil then
+							if v4.Multi then
+								default = {}
+								if type(newDefault) == "table" then
+									for _, v5 in ipairs(newDefault) do
+										default[v5] = true
+									end
+								end
+							else
+								default = newDefault
+							end
+						end
+						fn10()
+					end,
 				}
 			end
 
