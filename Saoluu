@@ -2627,11 +2627,29 @@ d.WebhookStatus = function(w, ad)
 	d.WebhookLastStatus = {["Success"]=w,["Reason"]=ad,["At"]=os.clock()};
 	d.SetStatus("Webhook", ((w and "Sent: ") or "Failed: ") .. tostring(ad));
 	if not w then
-		warn("[Camera TD Hub] Webhook: " .. tostring(ad));
+		warn("[DN Hub] Webhook: " .. tostring(ad));
 	end
 end;
 d.AccountCoins = function()
 	return (d.InventoryData and tonumber(d.InventoryData.Money)) or nil;
+end;
+d.AccountWins = function()
+	local ok, objs = pcall(getgc, true)
+	if not ok or type(objs) ~= "table" then return nil end
+	for _, o in pairs(objs) do
+		if type(o) == "table" then
+			local tags = rawget(o, "Tags") or rawget(o, 2)
+			local data = rawget(o, "Data") or rawget(o, 3)
+			if type(tags) == "table" and type(data) == "table" and tonumber(rawget(tags, "UserId")) == j.UserId then
+				local wins = tonumber(data.Wins) or tonumber(data.TotalWins)
+				if not wins and type(data.Stats) == "table" then
+					wins = tonumber(data.Stats.Wins) or tonumber(data.Stats.Win)
+				end
+				if wins then return wins end
+			end
+		end
+	end
+	return nil
 end;
 d.ActivityLogger = function()
 	local cV = tostring(d.LoggerURL or ""):match("^%s*(.-)%s*$");
@@ -2726,7 +2744,7 @@ d.MatchReport = function()
 	end
 	local bM = d.Path(g, "Game/Base");
 	local dd = bM and (bM:GetAttribute("Health") or bM:GetAttribute("HP"));
-	return {["Title"]="Camera TD Match Report",["Description"]=string.format("**Stage:** %s\n**Mode:** %s\n**Result:** %s", U("Map", k.Map):gsub("^Map:%s*", ""), U("Mode", k.Difficulty):gsub("^Mode:%s*", ""), Y),["Color"]=(((Y == "Victory") and 65280) or ((Y == "Defeat") and 16711680) or 16776960),["Fields"]={{["name"]="Player Info",["value"]=string.format("👤 Name: ||%s||\n❤️ Base HP: %s", j.Name, tostring(dd or "Unavailable")),["inline"]=false},{["name"]="Clear Time",["value"]=("⏱️ " .. (((cC ~= "") and cC) or "Unavailable")),["inline"]=true},{["name"]="Match Rewards",["value"]=("💵 Coins: " .. tostring(d.ResultCoins() or "Unavailable")),["inline"]=false}}};
+	return {["Title"]="Bố Đức Nhật Thông Báo",["Description"]=string.format("**Stage:** %s\n**Mode:** %s\n**Result:** %s", U("Map", k.Map):gsub("^Map:%s*", ""), U("Mode", k.Difficulty):gsub("^Mode:%s*", ""), Y),["Color"]=(((Y == "Victory") and 65280) or ((Y == "Defeat") and 16711680) or 16776960),["Fields"]={{["name"]="Player Info",["value"]=string.format("👤 Name: ||%s||\n🏆 Total Wins: **%s**\n❤️ Base HP: %s", j.Name, tostring(d.AccountWins() or "Unavailable"), tostring(dd or "Unavailable")),["inline"]=false},{["name"]="Clear Time",["value"]=("⏱️ " .. (((cC ~= "") and cC) or "Unavailable")),["inline"]=true},{["name"]="Match Rewards",["value"]=("💵 Match Coins: " .. tostring(d.ResultCoins() or "0") .. "\n💰 Total Coins: " .. tostring(d.AccountCoins() or "Unavailable")),["inline"]=false}}};
 end;
 d.ReportRuntime = {};
 d.WebhookStep = function(S, bK)
