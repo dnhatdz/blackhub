@@ -791,7 +791,7 @@ return { CreateWindow = function(arg, arg2)
 	local uiGradient8 = Instance.new("UIGradient", frame30)
 	uiGradient8.Rotation = 55
 	uiGradient8.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 180, 60)),
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 235, 255)),
 		ColorSequenceKeypoint.new(1, Color3.fromRGB(174, 75, 255)),
 	})
 	local imageLabel3 = Instance.new("ImageLabel", frame30)
@@ -815,7 +815,7 @@ return { CreateWindow = function(arg, arg2)
 	textLabel8.Position = UDim2.new(0, 78, 0, 18)
 	local textLabel9 = Instance.new("TextLabel", canvasGroup3)
 	textLabel9.Name = "Mark"
-	textLabel9.Text = "● LIVE"
+	textLabel9.Text = "● READY"
 	textLabel9.TextColor3 = tbl2.red
 	textLabel9.TextSize = 9
 	textLabel9.Font = Enum.Font.GothamBold
@@ -835,7 +835,7 @@ return { CreateWindow = function(arg, arg2)
 	textLabel10.TextXAlignment = Enum.TextXAlignment.Left
 	local textLabel11 = Instance.new("TextLabel", canvasGroup3)
 	textLabel11.Name = "Sub"
-	textLabel11.Text = "Running in background"
+	textLabel11.Text = "Tap to view active tasks"
 	textLabel11.TextColor3 = tbl2.desc
 	textLabel11.TextTransparency = 0.25
 	textLabel11.TextSize = 10
@@ -866,6 +866,7 @@ return { CreateWindow = function(arg, arg2)
 		Instance.new("UICorner", frame32).CornerRadius = UDim.new(1, 0)
 		table.insert(tbl5, frame32)
 	end
+	local islandStartedAt = os.clock()
 	local flag2 = false
 	local flag3 = false
 	local str = ""
@@ -949,6 +950,29 @@ return { CreateWindow = function(arg, arg2)
 			for _, v3 in ipairs(tbl4) do
 				fn(v3, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { Size = UDim2.new(0, 2, 0, math.random(3, 8)) }):Play()
 			end
+		end
+	end)
+	task.spawn(function()
+		local hue = 0.48
+		while textButton7.Parent do
+			hue = (hue + 0.003) % 1
+			local cyan = Color3.fromRGB(0, 235, 255)
+			local purple = Color3.fromRGB(174, 75, 255)
+			local blend = (math.sin(os.clock() * 1.4) + 1) * 0.5
+			local glow = cyan:Lerp(purple, blend)
+			fn(v2, TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Color = glow, Transparency = 0.18}):Play()
+			for i, bar in ipairs(tbl5) do
+				bar.BackgroundColor3 = i % 2 == 0 and purple or cyan
+			end
+			frame28.BackgroundColor3 = glow
+			task.wait(0.12)
+		end
+	end)
+	task.spawn(function()
+		while textButton7.Parent do
+			local elapsed = math.max(0, math.floor(os.clock() - islandStartedAt))
+			textLabel8.Text = string.format("%02d:%02d", math.floor(elapsed / 60), elapsed % 60)
+			task.wait(1)
 		end
 	end)
 	local flag4 = false
