@@ -2072,14 +2072,15 @@ return { CreateWindow = function(arg, arg2)
 					end
 				end
 				fn10()
+				local searchBox = arg5._window._dropZone:FindFirstChild("DropdownSearch", true)
 				local optionButtons = {}
 				local function filterDropdownOptions()
-					local query = string.lower(searchBox.Text or "")
+					local query = string.lower(searchBox and searchBox.Text or "")
 					for _, optionButton in ipairs(optionButtons) do
 						optionButton.Visible = query == "" or string.find(string.lower(optionButton.Text), query, 1, true) ~= nil
 					end
 				end
-				searchBox:GetPropertyChangedSignal("Text"):Connect(filterDropdownOptions)
+				if searchBox then searchBox:GetPropertyChangedSignal("Text"):Connect(filterDropdownOptions) end
 				textButton9.MouseButton1Click:Connect(function()
 					arg5._window._dropHeading.Text = v4.Title
 					arg5._window._dropZone.Visible = true
@@ -2090,7 +2091,7 @@ return { CreateWindow = function(arg, arg2)
 							child:Destroy()
 						end
 					end
-					searchBox.Text = ""
+					if searchBox then searchBox.Text = "" end
 					optionButtons = {}
 					for i, option in ipairs(v4.Options) do
 						local clone4 = arg5._window._dropTmpl:Clone()
