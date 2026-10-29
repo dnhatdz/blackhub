@@ -608,8 +608,8 @@ return { CreateWindow = function(arg, arg2)
 	scrollingFrame2.BackgroundColor3 = tbl2.fg
 	scrollingFrame2.BackgroundTransparency = 0.96
 	scrollingFrame2.BorderSizePixel = 0
-	scrollingFrame2.Size = UDim2.new(1, -40, 1, -70)
-	scrollingFrame2.Position = UDim2.new(0, 20, 0, 50)
+	scrollingFrame2.Size = UDim2.new(1, -40, 1, -112)
+	scrollingFrame2.Position = UDim2.new(0, 20, 0, 92)
 	scrollingFrame2.CanvasSize = UDim2.new(0, 0, 0, 0)
 	scrollingFrame2.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	scrollingFrame2.ScrollBarThickness = 3
@@ -617,6 +617,30 @@ return { CreateWindow = function(arg, arg2)
 	scrollingFrame2.ScrollingDirection = Enum.ScrollingDirection.Y
 	scrollingFrame2.Selectable = false
 	Instance.new("UICorner", scrollingFrame2).CornerRadius = UDim.new(0, 10)
+	local searchBox = Instance.new("TextBox", frame19)
+	searchBox.Name = "DropdownSearch"
+	searchBox.ZIndex = 3
+	searchBox.ClearTextOnFocus = false
+	searchBox.PlaceholderText = "Search options..."
+	searchBox.Text = ""
+	searchBox.TextColor3 = tbl2.title
+	searchBox.PlaceholderColor3 = tbl2.desc
+	searchBox.TextSize = 12
+	searchBox.Font = Enum.Font.Gotham
+	searchBox.TextXAlignment = Enum.TextXAlignment.Left
+	searchBox.BackgroundColor3 = tbl2.fg
+	searchBox.BackgroundTransparency = 0.93
+	searchBox.BorderSizePixel = 0
+	searchBox.Size = UDim2.new(1, -40, 0, 30)
+	searchBox.Position = UDim2.new(0, 20, 0, 50)
+	Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0, 7)
+	local searchPadding = Instance.new("UIPadding", searchBox)
+	searchPadding.PaddingLeft = UDim.new(0, 10)
+	searchPadding.PaddingRight = UDim.new(0, 10)
+	local searchStroke = Instance.new("UIStroke", searchBox)
+	searchStroke.Color = Color3.fromRGB(0, 235, 255)
+	searchStroke.Transparency = 0.45
+	searchStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	local uiStroke8 = Instance.new("UIStroke", scrollingFrame2)
 	uiStroke8.Color = Color3.fromRGB(0, 235, 255)
 	uiStroke8.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -2048,6 +2072,14 @@ return { CreateWindow = function(arg, arg2)
 					end
 				end
 				fn10()
+				local optionButtons = {}
+				local function filterDropdownOptions()
+					local query = string.lower(searchBox.Text or "")
+					for _, optionButton in ipairs(optionButtons) do
+						optionButton.Visible = query == "" or string.find(string.lower(optionButton.Text), query, 1, true) ~= nil
+					end
+				end
+				searchBox:GetPropertyChangedSignal("Text"):Connect(filterDropdownOptions)
 				textButton9.MouseButton1Click:Connect(function()
 					arg5._window._dropHeading.Text = v4.Title
 					arg5._window._dropZone.Visible = true
@@ -2058,6 +2090,8 @@ return { CreateWindow = function(arg, arg2)
 							child:Destroy()
 						end
 					end
+					searchBox.Text = ""
+					optionButtons = {}
 					for i, option in ipairs(v4.Options) do
 						local clone4 = arg5._window._dropTmpl:Clone()
 						clone4.Name = "Option" .. i
@@ -2065,6 +2099,7 @@ return { CreateWindow = function(arg, arg2)
 						clone4.Visible = true
 						clone4.LayoutOrder = i
 						clone4.Parent = arg5._window._listDrop
+						table.insert(optionButtons, clone4)
 						local tick = clone4:FindFirstChild("Tick")
 						if tick then
 							if v4.Multi then
@@ -2137,6 +2172,11 @@ return { CreateWindow = function(arg, arg2)
 						fn10()
 					end,
 				}
+			end
+			tbl6.AddMultiDropdown = function(arg5, arg6)
+				local config = fn2({ Multi = true }, arg6)
+				config.Multi = true
+				return arg5:AddDropdown(config)
 			end
 			tbl6.AddTextbox = function(arg5, arg6)
 				local v4 = fn2({
