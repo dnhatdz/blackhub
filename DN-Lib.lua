@@ -1413,7 +1413,7 @@ local function closeDropdownPanel()
 				if t.Status then
 					compactStatus.Visible = true
 					compactStatus.Text = t.Status
-					if t.Status == "ON" then
+					if t.Status == "ON" or t.Status == "Loaded!" then
 						compactStatus.TextColor3 = Colors.green
 					elseif t.Status == "OFF" then
 						compactStatus.TextColor3 = Colors.red
