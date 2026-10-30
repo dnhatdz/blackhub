@@ -372,6 +372,12 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 	crossBar2.Rotation = -45
 	Instance.new("UICorner", crossBar2).CornerRadius = UDim.new(1, 0)
 	local minimized = false
+	local maximized = false
+	local responsiveScale = 0.95
+	local ApplyResponsiveSize
+	local responsiveElements = {}
+	local elementLayoutSnapshots = setmetatable({}, { __mode = "k" })
+	local ApplyElementMobileLayout
 	local floatToggle = { frame = Instance.new("Frame", screenGui) }
 	floatToggle.frame.Name = "FrameToggleUI"
 	floatToggle.frame.Size = opts.ToggleSize
@@ -419,7 +425,7 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 	local function minimizeWindow()
 		if minimized then return end
 		minimized = true
-		Tween(uiScale, TweenPresets.fast, { Scale = mobile and opts.MobileScale - 0.1 or 0.85 }):Play()
+		Tween(uiScale, TweenPresets.fast, { Scale = responsiveScale * 0.85 }):Play()
 		Tween(shadowImage, TweenPresets.fade, { ImageTransparency = 1 }):Play()
 		task.wait(0.25)
 		shadowImage.Visible = false
@@ -430,10 +436,14 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 		minimized = false
 		floatToggle.frame.Visible = false
 		shadowImage.Visible = true
-		Tween(uiScale, TweenPresets.pop, { Scale = mobile and opts.MobileScale or 1 }):Play()
+		Tween(uiScale, TweenPresets.pop, { Scale = responsiveScale }):Play()
 		Tween(shadowImage, TweenPresets.fade, { ImageTransparency = 0.4 }):Play()
 	end
 	minimizeBtn.MouseButton1Click:Connect(minimizeWindow)
+	maximizeBtn.MouseButton1Click:Connect(function()
+		maximized = not maximized
+		if ApplyResponsiveSize then ApplyResponsiveSize() end
+	end)
 	floatToggle.dragged = MakeDraggable(floatToggle.frame, floatToggle.click)
 	floatToggle.click.Activated:Connect(function()
 		if floatToggle.dragged() then return end
@@ -1027,14 +1037,24 @@ local function closeDropdownPanel()
 			shadowImage.Position = UDim2.new(titleStartPosition.X.Scale, titleStartPosition.X.Offset + delta.X, titleStartPosition.Y.Scale, titleStartPosition.Y.Offset + delta.Y)
 		end
 	end)
-	local function ApplyResponsiveSize()
+	ApplyResponsiveSize = function()
 		local viewport = GetViewportSize()
 		local isSmall = viewport.X < 900 or viewport.Y < 600
+		local baseSize = mobile and opts.MobileSize or opts.Size
+		local baseWidth = baseSize.X.Scale * viewport.X + baseSize.X.Offset
+		local baseHeight = baseSize.Y.Scale * viewport.Y + baseSize.Y.Offset
+		local safeWidth = math.max(viewport.X - 24, 1)
+		local safeHeight = math.max(viewport.Y - 24, 1)
+		local fitScale = math.min(safeWidth / math.max(baseWidth, 1), safeHeight / math.max(baseHeight, 1))
+		local preferredScale = mobile and opts.MobileScale or 0.95
+		if maximized then
+			responsiveScale = math.clamp(fitScale, 0.35, 3.5)
+		else
+			responsiveScale = math.clamp(math.min(fitScale, 1) * preferredScale, 0.35, math.max(preferredScale, 0.35))
+		end
+		shadowImage.Size = baseSize
+		uiScale.Scale = responsiveScale
 		if mobile or isSmall then
-			local w = math.clamp(viewport.X * 0.92, 320, 520)
-			local h = math.clamp(viewport.Y * 0.78, 280, 420)
-			shadowImage.Size = UDim2.new(0, w, 0, h)
-			uiScale.Scale = math.clamp(math.min(viewport.X / 750, viewport.Y / 500), 0.6, 0.9)
 			windowFrame.Size = UDim2.new(1, -20, 1, -20)
 			headerRight.Position = UDim2.new(0, 86, 0, 0)
 			headerRight.Size = UDim2.new(1, -86, 0, 62)
@@ -1091,8 +1111,6 @@ local function closeDropdownPanel()
 			dropdownTemplate.Size = UDim2.new(1, 0, 0, 32)
 			dropdownTemplate.TextSize = 12
 		else
-			shadowImage.Size = opts.Size
-			uiScale.Scale = 0.95
 			windowFrame.Size = UDim2.new(1, -120, 1, -120)
 			headerRight.Size = UDim2.new(1, -183, 0, 85)
 			headerRight.Position = UDim2.new(0, 180, 0, 0)
@@ -1151,9 +1169,49 @@ local function closeDropdownPanel()
 			dropdownTemplate.Size = UDim2.new(1, 0, 0, 34)
 			dropdownTemplate.TextSize = 13
 		end
+		if maximized then
+			windowFrame.Size = UDim2.new(1, -20, 1, -20)
+		end
+		for index = #responsiveElements, 1, -1 do
+			local element = responsiveElements[index]
+			if element.Parent then
+				ApplyElementMobileLayout(element)
+			else
+				table.remove(responsiveElements, index)
+			end
+		end
 	end
-	local function ApplyElementMobileLayout(element)
-		if not (mobile or GetViewportSize().X < 900) then return end
+	ApplyElementMobileLayout = function(element)
+		if not elementLayoutSnapshots[element] then
+			local snapshot = { Objects = {} }
+			local function capture(object)
+				local props = {}
+				if object:IsA("GuiObject") then
+					props.Size = object.Size
+					props.Position = object.Position
+				end
+				if object:IsA("TextLabel") or object:IsA("TextButton") or object:IsA("TextBox") then
+					props.TextSize = object.TextSize
+				end
+				snapshot.Objects[object] = props
+			end
+			capture(element)
+			for _, object in ipairs(element:GetDescendants()) do capture(object) end
+			elementLayoutSnapshots[element] = snapshot
+			table.insert(responsiveElements, element)
+		end
+		local compact = mobile or GetViewportSize().X < 900 or GetViewportSize().Y < 600
+		local snapshot = elementLayoutSnapshots[element]
+		if not compact then
+			for object, props in pairs(snapshot.Objects) do
+				if object.Parent then
+					if props.Size then object.Size = props.Size end
+					if props.Position then object.Position = props.Position end
+					if props.TextSize then object.TextSize = props.TextSize end
+				end
+			end
+			return
+		end
 		local function layoutTextBlock(frame, hasDesc)
 			if not frame then return end
 			frame.Position = UDim2.new(0, 10, 0.5, 0)
@@ -1226,8 +1284,8 @@ local function closeDropdownPanel()
 			end
 		elseif element.Name == "Dropdown" or element.Name == "Textbox" or element.Name == "MultiDropdown" then
 			local tb = element:FindFirstChild("TextBlock")
+			local hasDesc = tb and tb:FindFirstChild("Desc") ~= nil
 			if tb then
-				local hasDesc = tb:FindFirstChild("Desc") ~= nil
 				tb.Position = UDim2.new(0, 10, 0, 7)
 				tb.Size = UDim2.new(1, -20, 0, hasDesc and 36 or 24)
 				local title = tb:FindFirstChild("Title")
@@ -1238,10 +1296,11 @@ local function closeDropdownPanel()
 					desc.Position = UDim2.new(0, 0, 0, 13)
 				end
 			end
+			element.Size = UDim2.new(1, 0, 0, hasDesc and 80 or 66)
 			local field = element:FindFirstChild("Field")
 			if field then
 				field.Size = UDim2.new(1, -20, 0, 28)
-				field.Position = UDim2.new(0, 10, 1, -35)
+				field.Position = UDim2.new(0, 10, 1, -6)
 				local selected = field:FindFirstChild("Selected")
 				if selected then
 					selected.TextSize = 11
@@ -1268,7 +1327,7 @@ local function closeDropdownPanel()
 		end
 	end)
 	screenGui.Parent = opts.Parent
-	Tween(uiScale, TweenPresets.spring, { Scale = mobile and opts.MobileScale or 1 }):Play()
+	Tween(uiScale, TweenPresets.spring, { Scale = responsiveScale }):Play()
 	Tween(shadowImage, TweenPresets.soft, { ImageTransparency = 0.4 }):Play()
 	return {
 		_gui = screenGui,
@@ -1599,9 +1658,7 @@ local function closeDropdownPanel()
 					pcall(tg.Callback, state)
 				end
 				row.MouseButton1Click:Connect(flip)
-				if isSmallScreen then
-					ApplyElementMobileLayout(row)
-				end
+				ApplyElementMobileLayout(row)
 				return {
 					Value = state,
 					SetValue = function(_, newVal)
@@ -1688,9 +1745,7 @@ local function closeDropdownPanel()
 				row.MouseButton1Click:Connect(function()
 					pcall(bt.Callback)
 				end)
-				if isSmallScreen then
-					ApplyElementMobileLayout(row)
-				end
+				ApplyElementMobileLayout(row)
 				return { Frame = row }
 			end
 			tabData.AddSeparator = function(tabRef, sepOptions)
@@ -1834,9 +1889,7 @@ local function closeDropdownPanel()
 						dragging = false
 					end
 				end)
-				if isSmallScreen then
-					ApplyElementMobileLayout(row)
-				end
+				ApplyElementMobileLayout(row)
 				return {
 					Value = currentValue,
 					SetValue = function(_, newVal)
@@ -1924,9 +1977,7 @@ local function closeDropdownPanel()
 				field.FocusLost:Connect(function()
 					pcall(tb.Callback, field.Text)
 				end)
-				if isSmallScreen then
-					ApplyElementMobileLayout(row)
-				end
+				ApplyElementMobileLayout(row)
 				return {
 					Frame = row,
 					GetValue = function()
@@ -2111,9 +2162,7 @@ local function closeDropdownPanel()
 					activeDropdownSearchRefresh()
 				end)
 				refreshSingleLabel()
-				if isSmallScreen then
-					ApplyElementMobileLayout(row)
-				end
+				ApplyElementMobileLayout(row)
 				return {
 					Frame = row,
 					GetValue = function()
@@ -2450,9 +2499,7 @@ local function closeDropdownPanel()
 				multiClose.MouseButton1Click:Connect(closeMulti)
 				multiBackdrop.MouseButton1Click:Connect(closeMulti)
 				multiSearch:GetPropertyChangedSignal("Text"):Connect(rebuildMultiList)
-				if isSmallScreen then
-					ApplyElementMobileLayout(row)
-				end
+				ApplyElementMobileLayout(row)
 				return {
 					Frame = row,
 					GetValue = function()
