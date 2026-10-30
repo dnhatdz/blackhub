@@ -730,6 +730,7 @@ end)
 
 local function closeDropdownPanel()
 		dropdownZone.Visible = false
+		activeDropdownSearchRefresh = nil
 		Tween(dropdownZone, TweenPresets.fade, { GroupTransparency = 1 }):Play()
 		Tween(dropdownPanel:FindFirstChildOfClass("UIScale"), TweenPresets.pop, { Scale = 0.95 }):Play()
 	end
@@ -1189,6 +1190,7 @@ local function closeDropdownPanel()
 				if object:IsA("GuiObject") then
 					props.Size = object.Size
 					props.Position = object.Position
+					props.AnchorPoint = object.AnchorPoint
 				end
 				if object:IsA("TextLabel") or object:IsA("TextButton") or object:IsA("TextBox") then
 					props.TextSize = object.TextSize
@@ -1207,6 +1209,7 @@ local function closeDropdownPanel()
 				if object.Parent then
 					if props.Size then object.Size = props.Size end
 					if props.Position then object.Position = props.Position end
+					if props.AnchorPoint then object.AnchorPoint = props.AnchorPoint end
 					if props.TextSize then object.TextSize = props.TextSize end
 				end
 			end
@@ -1247,6 +1250,7 @@ local function closeDropdownPanel()
 					end
 					local track = element:FindFirstChild("Track")
 					if track then
+						track.AnchorPoint = Vector2.new(1, 0.5)
 						track.Size = UDim2.new(0, 100, 0, 5)
 						track.Position = UDim2.new(1, -10, 0.5, 5)
 					end
@@ -1492,6 +1496,7 @@ local function closeDropdownPanel()
 			tabBtn.Size = UDim2.new(1, 0, 0, isSmallScreen and 34 or 39)
 			tabBtn.Text = ""
 			tabBtn.AutoButtonColor = false
+			tabBtn.ClipsDescendants = true
 			tabBtn.Selectable = false
 			Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 10)
 			local tabStroke = Instance.new("UIStroke", tabBtn)
@@ -1520,6 +1525,12 @@ local function closeDropdownPanel()
 			tabLabel.Size = UDim2.new(1, isSmallScreen and -30 or -40, 1, 0)
 			tabLabel.Position = UDim2.new(0, isSmallScreen and 28 or 40, 0.5, 0)
 			tabLabel.TextXAlignment = Enum.TextXAlignment.Left
+			tabLabel.TextWrapped = false
+			tabLabel.TextTruncate = Enum.TextTruncate.AtEnd
+			tabLabel.TextScaled = true
+			local tabTextConstraint = Instance.new("UITextSizeConstraint", tabLabel)
+			tabTextConstraint.MinTextSize = 8
+			tabTextConstraint.MaxTextSize = 12
 			local tabPage = Instance.new("ScrollingFrame", windowRef._window:FindFirstChild("Layout").RealLayout)
 			tabPage.Name = "Page" .. layoutOrder
 			tabPage.LayoutOrder = layoutOrder
@@ -2297,208 +2308,51 @@ local function closeDropdownPanel()
 					end
 				end
 				refreshLabel()
-				local panelCanvas = Instance.new("CanvasGroup")
-				panelCanvas.Name = "MultiCanvas"
-				panelCanvas.Visible = false
-				panelCanvas.GroupTransparency = 1
-				panelCanvas.ZIndex = 50
-				panelCanvas.BackgroundColor3 = Color3.new(0, 0, 0)
-				panelCanvas.BackgroundTransparency = 0.4
-				panelCanvas.BorderSizePixel = 0
-				panelCanvas.AnchorPoint = Vector2.new(0.5, 0.5)
-				panelCanvas.Position = UDim2.new(0.5, 0, 0.5, 0)
-				panelCanvas.Size = UDim2.new(1, 0, 1, 0)
-				panelCanvas.Parent = windowRef._gui
-				Instance.new("UICorner", panelCanvas).CornerRadius = UDim.new(0, 14)
-				local multiBackdrop = Instance.new("TextButton", panelCanvas)
-				multiBackdrop.Name = "Backdrop"
-				multiBackdrop.AutoButtonColor = false
-				multiBackdrop.BackgroundTransparency = 1
-				multiBackdrop.Size = UDim2.new(1, 0, 1, 0)
-				multiBackdrop.Text = ""
-				multiBackdrop.ZIndex = 0
-				local multiPanel = Instance.new("Frame", panelCanvas)
-				multiPanel.Name = "MultiPanel"
-				multiPanel.ZIndex = 2
-				multiPanel.BackgroundColor3 = Colors.bg
-				multiPanel.BackgroundTransparency = 0.02
-				multiPanel.BorderSizePixel = 0
-				multiPanel.AnchorPoint = Vector2.new(0.5, 0.5)
-				multiPanel.Position = UDim2.new(0.5, 0, 0.5, 0)
-				multiPanel.Size = UDim2.new(1, -150, 1, -100)
-				Instance.new("UICorner", multiPanel).CornerRadius = UDim.new(0, 14)
-				local multiStroke = Instance.new("UIStroke", multiPanel)
-				multiStroke.Color = Color3.fromRGB(0, 235, 255)
-				multiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-				local multiGradient = Instance.new("UIGradient", multiStroke)
-				multiGradient.Rotation = 90
-				multiGradient.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(1, 0.85) })
-				local multiHeading = Instance.new("TextLabel", multiPanel)
-				multiHeading.Name = "Heading"
-				multiHeading.Text = dd.Title
-				multiHeading.TextColor3 = Colors.title
-				multiHeading.TextSize = 14
-				multiHeading.Font = Enum.Font.GothamBold
-				multiHeading.BackgroundTransparency = 1
-				multiHeading.Size = UDim2.new(1, -150, 0, 20)
-				multiHeading.Position = UDim2.new(0, 85, 0, 15)
-				multiHeading.TextXAlignment = Enum.TextXAlignment.Left
-				local multiClose = Instance.new("TextButton", multiPanel)
-				multiClose.Name = "Close"
-				multiClose.AutoButtonColor = false
-				multiClose.BackgroundColor3 = Colors.fg
-				multiClose.BackgroundTransparency = 0.93
-				multiClose.BorderSizePixel = 0
-				multiClose.Text = "✕"
-				multiClose.TextColor3 = Color3.fromRGB(255, 200, 130)
-				multiClose.TextSize = 12
-				multiClose.Font = Enum.Font.GothamBold
-				multiClose.Size = UDim2.new(0, 26, 0, 26)
-				multiClose.Position = UDim2.new(1, -36, 0, 12)
-				Instance.new("UICorner", multiClose).CornerRadius = UDim.new(0, 7)
-				local multiCloseStroke = Instance.new("UIStroke", multiClose)
-				multiCloseStroke.Color = Color3.fromRGB(0, 235, 255)
-				multiCloseStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-				local multiSearch = Instance.new("TextBox", multiPanel)
-				multiSearch.Name = "Search"
-				multiSearch.ZIndex = 3
-				multiSearch.ClearTextOnFocus = false
-				multiSearch.PlaceholderText = "Search options..."
-				multiSearch.Text = ""
-				multiSearch.TextColor3 = Colors.title
-				multiSearch.PlaceholderColor3 = Colors.desc
-				multiSearch.TextSize = 12
-				multiSearch.Font = Enum.Font.Gotham
-				multiSearch.TextXAlignment = Enum.TextXAlignment.Left
-				multiSearch.BackgroundColor3 = Colors.fg
-				multiSearch.BackgroundTransparency = 0.93
-				multiSearch.BorderSizePixel = 0
-				multiSearch.Size = UDim2.new(1, -145, 0, 30)
-				multiSearch.Position = UDim2.new(0, 85, 0, 12)
-				Instance.new("UICorner", multiSearch).CornerRadius = UDim.new(0, 7)
-				local multiSearchPad = Instance.new("UIPadding", multiSearch)
-				multiSearchPad.PaddingLeft = UDim.new(0, 10)
-				multiSearchPad.PaddingRight = UDim.new(0, 10)
-				local multiSearchStroke = Instance.new("UIStroke", multiSearch)
-				multiSearchStroke.Color = Color3.fromRGB(0, 235, 255)
-				multiSearchStroke.Transparency = 0.45
-				multiSearchStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-				local multiList = Instance.new("ScrollingFrame", multiPanel)
-				multiList.Name = "List"
-				multiList.BackgroundColor3 = Colors.fg
-				multiList.BackgroundTransparency = 0.96
-				multiList.BorderSizePixel = 0
-				multiList.Size = UDim2.new(1, -40, 1, -78)
-				multiList.Position = UDim2.new(0, 20, 0, 58)
-				multiList.CanvasSize = UDim2.new(0, 0, 0, 0)
-				multiList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-				multiList.ScrollBarThickness = 3
-				multiList.ScrollBarImageTransparency = 0.6
-				multiList.ScrollingDirection = Enum.ScrollingDirection.Y
-				multiList.Selectable = false
-				Instance.new("UICorner", multiList).CornerRadius = UDim.new(0, 10)
-				local multiListStroke = Instance.new("UIStroke", multiList)
-				multiListStroke.Color = Color3.fromRGB(0, 235, 255)
-				multiListStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-				local multiListPad = Instance.new("UIPadding", multiList)
-				multiListPad.PaddingTop = UDim.new(0, 8)
-				multiListPad.PaddingRight = UDim.new(0, 8)
-				multiListPad.PaddingLeft = UDim.new(0, 8)
-				multiListPad.PaddingBottom = UDim.new(0, 8)
-				local multiListLayout = Instance.new("UIListLayout", multiList)
-				multiListLayout.Padding = UDim.new(0, 5)
-				multiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-				Instance.new("UIScale", multiPanel)
 				local function getSelectedArray()
 					local out = {}
-					for _, o in ipairs(dd.Options) do
-						if selectedValues[o] then table.insert(out, o) end
+					for _, option in ipairs(dd.Options) do
+						if selectedValues[option] then table.insert(out, option) end
 					end
 					return out
 				end
+				
 				local function rebuildMultiList()
-					for _, c in ipairs(multiList:GetChildren()) do
-						if c:IsA("TextButton") then c:Destroy() end
+					for _, child in ipairs(windowRef._listDrop:GetChildren()) do
+						if child:IsA("TextButton") and child ~= windowRef._dropTmpl then child:Destroy() end
 					end
-					local term = string.lower(multiSearch.Text or "")
-					for _, opt in ipairs(dd.Options) do
-						if term == "" or string.find(string.lower(opt), term, 1, true) then
-							local btn = Instance.new("TextButton", multiList)
-							btn.Name = opt
-							btn.AutoButtonColor = false
-							btn.BackgroundColor3 = Colors.fg
-							btn.BackgroundTransparency = 0.95
-							btn.BorderSizePixel = 0
-							btn.Size = UDim2.new(1, 0, 0, 34)
-							btn.Text = ""
-							Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-							local bStroke = Instance.new("UIStroke", btn)
-							bStroke.Color = Color3.fromRGB(0, 235, 255)
-							bStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-							local bPad = Instance.new("UIPadding", btn)
-							bPad.PaddingLeft = UDim.new(0, 12)
-							bPad.PaddingRight = UDim.new(0, 12)
-							local lbl = Instance.new("TextLabel", btn)
-							lbl.Name = "Label"
-							lbl.Text = opt
-							lbl.TextColor3 = Colors.title
-							lbl.TextSize = 13
-							lbl.Font = Enum.Font.GothamMedium
-							lbl.BackgroundTransparency = 1
-							lbl.Size = UDim2.new(1, -22, 1, 0)
-							lbl.TextXAlignment = Enum.TextXAlignment.Left
-							lbl.TextTruncate = Enum.TextTruncate.AtEnd
-							local tick = Instance.new("Frame", btn)
-							tick.Name = "Tick"
-							tick.BackgroundTransparency = 1
-							tick.AnchorPoint = Vector2.new(1, 0.5)
-							tick.Size = UDim2.new(0, 12, 0, 10)
-							tick.Position = UDim2.new(1, 0, 0.5, 0)
-							local short = Instance.new("Frame", tick)
-							short.Name = "Short"
-							short.BackgroundColor3 = Color3.fromRGB(0, 235, 255)
-							short.BorderSizePixel = 0
-							short.AnchorPoint = Vector2.new(0.5, 0.5)
-							short.Size = UDim2.new(0, 6, 0, 1)
-							short.Position = UDim2.new(0, 3, 0, 7)
-							short.Rotation = 45
-							Instance.new("UICorner", short).CornerRadius = UDim.new(1, 0)
-							local long = Instance.new("Frame", tick)
-							long.Name = "Long"
-							long.BackgroundColor3 = Color3.fromRGB(0, 235, 255)
-							long.BorderSizePixel = 0
-							long.AnchorPoint = Vector2.new(0.5, 0.5)
-							long.Size = UDim2.new(0, 11, 0, 1)
-							long.Position = UDim2.new(0, 7, 0, 4)
-							long.Rotation = -45
-							Instance.new("UICorner", long).CornerRadius = UDim.new(1, 0)
-							tick.Visible = selectedValues[opt] == true
-							btn.MouseButton1Click:Connect(function()
-								selectedValues[opt] = not selectedValues[opt]
-								tick.Visible = selectedValues[opt] == true
+					local term = string.lower(dropdownSearch.Text or "")
+					for index, option in ipairs(dd.Options) do
+						if term == "" or string.find(string.lower(option), term, 1, true) then
+							local item = windowRef._dropTmpl:Clone()
+							item.Name = option
+							item.Visible = true
+							item.Text = option
+							item.LayoutOrder = index
+							item.Parent = windowRef._listDrop
+							local tick = item:FindFirstChild("Tick")
+							if tick then tick.Visible = selectedValues[option] == true end
+							item.MouseButton1Click:Connect(function()
+								selectedValues[option] = not selectedValues[option]
 								refreshLabel()
+								if tick then tick.Visible = selectedValues[option] == true end
 								pcall(dd.Callback, getSelectedArray())
 							end)
 						end
 					end
 				end
-				local function closeMulti()
-					Tween(panelCanvas, TweenPresets.fade, { GroupTransparency = 1 }):Play()
-					Tween(multiPanel:FindFirstChildOfClass("UIScale"), TweenPresets.pop, { Scale = 0.95 }):Play()
-					task.delay(0.32, function() panelCanvas.Visible = false end)
-				end
+				
 				field.MouseButton1Click:Connect(function()
-					panelCanvas.Visible = true
-					panelCanvas.GroupTransparency = 1
-					local uis = multiPanel:FindFirstChildOfClass("UIScale")
-					uis.Scale = 0.95
-					Tween(panelCanvas, TweenPresets.fade, { GroupTransparency = 0 }):Play()
-					Tween(uis, TweenPresets.pop, { Scale = 1 }):Play()
+					windowRef._dropZone.Visible = true
+					windowRef._dropZone.GroupTransparency = 1
+					windowRef._realDrop:FindFirstChildOfClass("UIScale").Scale = 0.95
+					Tween(windowRef._dropZone, TweenPresets.fade, { GroupTransparency = 0 }):Play()
+					Tween(windowRef._realDrop:FindFirstChildOfClass("UIScale"), TweenPresets.pop, { Scale = 1 }):Play()
+					windowRef._dropHeading.Text = dd.Title
+					windowRef._dropHeading.Visible = false
+					activeDropdownSearchRefresh = rebuildMultiList
+					dropdownSearch.Text = ""
 					rebuildMultiList()
 				end)
-				multiClose.MouseButton1Click:Connect(closeMulti)
-				multiBackdrop.MouseButton1Click:Connect(closeMulti)
-				multiSearch:GetPropertyChangedSignal("Text"):Connect(rebuildMultiList)
 				ApplyElementMobileLayout(row)
 				return {
 					Frame = row,
@@ -2513,7 +2367,7 @@ local function closeDropdownPanel()
 							end
 						end
 						refreshLabel()
-						rebuildMultiList()
+						if windowRef._dropZone.Visible and activeDropdownSearchRefresh == rebuildMultiList then rebuildMultiList() end
 					end,
 				}
 			end
