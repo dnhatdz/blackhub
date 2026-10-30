@@ -605,6 +605,30 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 	local ddCrossBar2 = ddCrossBar1:Clone()
 	ddCrossBar2.Parent = dropdownCloseCross
 	ddCrossBar2.Rotation = -45
+	local dropdownSearch = Instance.new("TextBox", dropdownPanel)
+	dropdownSearch.Name = "DropdownSearch"
+	dropdownSearch.ZIndex = 3
+	dropdownSearch.ClearTextOnFocus = false
+	dropdownSearch.PlaceholderText = "Search options..."
+	dropdownSearch.Text = ""
+	dropdownSearch.TextColor3 = Colors.title
+	dropdownSearch.PlaceholderColor3 = Colors.desc
+	dropdownSearch.TextSize = 12
+	dropdownSearch.Font = Enum.Font.Gotham
+	dropdownSearch.TextXAlignment = Enum.TextXAlignment.Left
+	dropdownSearch.BackgroundColor3 = Colors.fg
+	dropdownSearch.BackgroundTransparency = 0.93
+	dropdownSearch.BorderSizePixel = 0
+	dropdownSearch.Size = UDim2.new(1, -145, 0, 30)
+	dropdownSearch.Position = UDim2.new(0, 85, 0, 12)
+	Instance.new("UICorner", dropdownSearch).CornerRadius = UDim.new(0, 7)
+	local dropdownSearchPadding = Instance.new("UIPadding", dropdownSearch)
+	dropdownSearchPadding.PaddingLeft = UDim.new(0, 10)
+	dropdownSearchPadding.PaddingRight = UDim.new(0, 10)
+	local dropdownSearchStroke = Instance.new("UIStroke", dropdownSearch)
+	dropdownSearchStroke.Color = Color3.fromRGB(0, 235, 255)
+	dropdownSearchStroke.Transparency = 0.45
+	dropdownSearchStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	local dropdownList = Instance.new("ScrollingFrame", dropdownPanel)
 	dropdownList.Name = "ListDropdown"
 	dropdownList.BackgroundColor3 = Colors.fg
@@ -686,7 +710,15 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 	tickLong.Rotation = -45
 	Instance.new("UICorner", tickLong).CornerRadius = UDim.new(1, 0)
 	Instance.new("UIScale", dropdownPanel)
-	local function closeDropdownPanel()
+	local activeDropdownSearchRefresh = nil
+
+dropdownSearch:GetPropertyChangedSignal("Text"):Connect(function()
+	if activeDropdownSearchRefresh then
+		activeDropdownSearchRefresh()
+	end
+end)
+
+local function closeDropdownPanel()
 		dropdownZone.Visible = false
 		Tween(dropdownZone, TweenPresets.fade, { GroupTransparency = 1 }):Play()
 		Tween(dropdownPanel:FindFirstChildOfClass("UIScale"), TweenPresets.pop, { Scale = 0.95 }):Play()
@@ -2030,44 +2062,53 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 					end
 					windowRef._dropHeading.Text = dd.Title
 					windowRef._dropHeading.Visible = false
+					local term = ""
 					local function rebuildList()
 						for _, c in ipairs(windowRef._listDrop:GetChildren()) do
 							if c:IsA("TextButton") and c ~= windowRef._dropTmpl then c:Destroy() end
 						end
 						for _, opt in ipairs(dd.Options) do
-							local clone = windowRef._dropTmpl:Clone()
-							clone.Name = opt
-							clone.Visible = true
-							clone.Text = opt
-							clone.LayoutOrder = 1
-							clone.Parent = windowRef._listDrop
-							local tick = clone:FindFirstChild("Tick")
-							if tick then
-								if dd.Multi then
-									tick.Visible = selectedValues[opt] == true
-								else
-									tick.Visible = (selLbl.Text == opt)
-								end
-							end
-							clone.MouseButton1Click:Connect(function()
-								if dd.Multi then
-									selectedValues[opt] = not selectedValues[opt]
-									refreshSingleLabel()
-									local out = {}
-									for _, o in ipairs(dd.Options) do
-										if selectedValues[o] then table.insert(out, o) end
+							if term == "" or string.find(string.lower(opt), term, 1, true) then
+								local clone = windowRef._dropTmpl:Clone()
+								clone.Name = opt
+								clone.Visible = true
+								clone.Text = opt
+								clone.LayoutOrder = 1
+								clone.Parent = windowRef._listDrop
+								local tick = clone:FindFirstChild("Tick")
+								if tick then
+									if dd.Multi then
+										tick.Visible = selectedValues[opt] == true
+									else
+										tick.Visible = (selLbl.Text == opt)
 									end
-									pcall(dd.Callback, out)
-									if tick then tick.Visible = selectedValues[opt] == true end
-								else
-									selLbl.Text = opt
-									pcall(dd.Callback, opt)
-									closeDropdownPanel()
 								end
-							end)
+								clone.MouseButton1Click:Connect(function()
+									if dd.Multi then
+										selectedValues[opt] = not selectedValues[opt]
+										refreshSingleLabel()
+										local out = {}
+										for _, o in ipairs(dd.Options) do
+											if selectedValues[o] then table.insert(out, o) end
+										end
+										pcall(dd.Callback, out)
+										if tick then tick.Visible = selectedValues[opt] == true end
+									else
+										selLbl.Text = opt
+										pcall(dd.Callback, opt)
+										closeDropdownPanel()
+									end
+								end)
+							end
 						end
 					end
-					rebuildList()
+					windowRef._gui:FindFirstChild("DNHubUI", true)
+					activeDropdownSearchRefresh = function()
+						term = string.lower(dropdownSearch.Text or "")
+						rebuildList()
+					end
+					dropdownSearch.Text = ""
+					activeDropdownSearchRefresh()
 				end)
 				refreshSingleLabel()
 				if isSmallScreen then
@@ -2269,13 +2310,37 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 				local multiCloseStroke = Instance.new("UIStroke", multiClose)
 				multiCloseStroke.Color = Color3.fromRGB(0, 235, 255)
 				multiCloseStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+				local multiSearch = Instance.new("TextBox", multiPanel)
+				multiSearch.Name = "Search"
+				multiSearch.ZIndex = 3
+				multiSearch.ClearTextOnFocus = false
+				multiSearch.PlaceholderText = "Search options..."
+				multiSearch.Text = ""
+				multiSearch.TextColor3 = Colors.title
+				multiSearch.PlaceholderColor3 = Colors.desc
+				multiSearch.TextSize = 12
+				multiSearch.Font = Enum.Font.Gotham
+				multiSearch.TextXAlignment = Enum.TextXAlignment.Left
+				multiSearch.BackgroundColor3 = Colors.fg
+				multiSearch.BackgroundTransparency = 0.93
+				multiSearch.BorderSizePixel = 0
+				multiSearch.Size = UDim2.new(1, -145, 0, 30)
+				multiSearch.Position = UDim2.new(0, 85, 0, 12)
+				Instance.new("UICorner", multiSearch).CornerRadius = UDim.new(0, 7)
+				local multiSearchPad = Instance.new("UIPadding", multiSearch)
+				multiSearchPad.PaddingLeft = UDim.new(0, 10)
+				multiSearchPad.PaddingRight = UDim.new(0, 10)
+				local multiSearchStroke = Instance.new("UIStroke", multiSearch)
+				multiSearchStroke.Color = Color3.fromRGB(0, 235, 255)
+				multiSearchStroke.Transparency = 0.45
+				multiSearchStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 				local multiList = Instance.new("ScrollingFrame", multiPanel)
 				multiList.Name = "List"
 				multiList.BackgroundColor3 = Colors.fg
 				multiList.BackgroundTransparency = 0.96
 				multiList.BorderSizePixel = 0
-				multiList.Size = UDim2.new(1, -40, 1, -68)
-				multiList.Position = UDim2.new(0, 20, 0, 48)
+				multiList.Size = UDim2.new(1, -40, 1, -78)
+				multiList.Position = UDim2.new(0, 20, 0, 58)
 				multiList.CanvasSize = UDim2.new(0, 0, 0, 0)
 				multiList.AutomaticCanvasSize = Enum.AutomaticSize.Y
 				multiList.ScrollBarThickness = 3
@@ -2306,63 +2371,66 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 					for _, c in ipairs(multiList:GetChildren()) do
 						if c:IsA("TextButton") then c:Destroy() end
 					end
+					local term = string.lower(multiSearch.Text or "")
 					for _, opt in ipairs(dd.Options) do
-						local btn = Instance.new("TextButton", multiList)
-						btn.Name = opt
-						btn.AutoButtonColor = false
-						btn.BackgroundColor3 = Colors.fg
-						btn.BackgroundTransparency = 0.95
-						btn.BorderSizePixel = 0
-						btn.Size = UDim2.new(1, 0, 0, 34)
-						btn.Text = ""
-						Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-						local bStroke = Instance.new("UIStroke", btn)
-						bStroke.Color = Color3.fromRGB(0, 235, 255)
-						bStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-						local bPad = Instance.new("UIPadding", btn)
-						bPad.PaddingLeft = UDim.new(0, 12)
-						bPad.PaddingRight = UDim.new(0, 12)
-						local lbl = Instance.new("TextLabel", btn)
-						lbl.Name = "Label"
-						lbl.Text = opt
-						lbl.TextColor3 = Colors.title
-						lbl.TextSize = 13
-						lbl.Font = Enum.Font.GothamMedium
-						lbl.BackgroundTransparency = 1
-						lbl.Size = UDim2.new(1, -22, 1, 0)
-						lbl.TextXAlignment = Enum.TextXAlignment.Left
-						lbl.TextTruncate = Enum.TextTruncate.AtEnd
-						local tick = Instance.new("Frame", btn)
-						tick.Name = "Tick"
-						tick.BackgroundTransparency = 1
-						tick.AnchorPoint = Vector2.new(1, 0.5)
-						tick.Size = UDim2.new(0, 12, 0, 10)
-						tick.Position = UDim2.new(1, 0, 0.5, 0)
-						local short = Instance.new("Frame", tick)
-						short.Name = "Short"
-						short.BackgroundColor3 = Color3.fromRGB(0, 235, 255)
-						short.BorderSizePixel = 0
-						short.AnchorPoint = Vector2.new(0.5, 0.5)
-						short.Size = UDim2.new(0, 6, 0, 1)
-						short.Position = UDim2.new(0, 3, 0, 7)
-						short.Rotation = 45
-						Instance.new("UICorner", short).CornerRadius = UDim.new(1, 0)
-						local long = Instance.new("Frame", tick)
-						long.Name = "Long"
-						long.BackgroundColor3 = Color3.fromRGB(0, 235, 255)
-						long.BorderSizePixel = 0
-						long.AnchorPoint = Vector2.new(0.5, 0.5)
-						long.Size = UDim2.new(0, 11, 0, 1)
-						long.Position = UDim2.new(0, 7, 0, 4)
-						long.Rotation = -45
-						Instance.new("UICorner", long).CornerRadius = UDim.new(1, 0)
-						tick.Visible = selectedValues[opt] == true
-						btn.MouseButton1Click:Connect(function()
-							selectedValues[opt] = not selectedValues[opt]
+						if term == "" or string.find(string.lower(opt), term, 1, true) then
+							local btn = Instance.new("TextButton", multiList)
+							btn.Name = opt
+							btn.AutoButtonColor = false
+							btn.BackgroundColor3 = Colors.fg
+							btn.BackgroundTransparency = 0.95
+							btn.BorderSizePixel = 0
+							btn.Size = UDim2.new(1, 0, 0, 34)
+							btn.Text = ""
+							Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+							local bStroke = Instance.new("UIStroke", btn)
+							bStroke.Color = Color3.fromRGB(0, 235, 255)
+							bStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+							local bPad = Instance.new("UIPadding", btn)
+							bPad.PaddingLeft = UDim.new(0, 12)
+							bPad.PaddingRight = UDim.new(0, 12)
+							local lbl = Instance.new("TextLabel", btn)
+							lbl.Name = "Label"
+							lbl.Text = opt
+							lbl.TextColor3 = Colors.title
+							lbl.TextSize = 13
+							lbl.Font = Enum.Font.GothamMedium
+							lbl.BackgroundTransparency = 1
+							lbl.Size = UDim2.new(1, -22, 1, 0)
+							lbl.TextXAlignment = Enum.TextXAlignment.Left
+							lbl.TextTruncate = Enum.TextTruncate.AtEnd
+							local tick = Instance.new("Frame", btn)
+							tick.Name = "Tick"
+							tick.BackgroundTransparency = 1
+							tick.AnchorPoint = Vector2.new(1, 0.5)
+							tick.Size = UDim2.new(0, 12, 0, 10)
+							tick.Position = UDim2.new(1, 0, 0.5, 0)
+							local short = Instance.new("Frame", tick)
+							short.Name = "Short"
+							short.BackgroundColor3 = Color3.fromRGB(0, 235, 255)
+							short.BorderSizePixel = 0
+							short.AnchorPoint = Vector2.new(0.5, 0.5)
+							short.Size = UDim2.new(0, 6, 0, 1)
+							short.Position = UDim2.new(0, 3, 0, 7)
+							short.Rotation = 45
+							Instance.new("UICorner", short).CornerRadius = UDim.new(1, 0)
+							local long = Instance.new("Frame", tick)
+							long.Name = "Long"
+							long.BackgroundColor3 = Color3.fromRGB(0, 235, 255)
+							long.BorderSizePixel = 0
+							long.AnchorPoint = Vector2.new(0.5, 0.5)
+							long.Size = UDim2.new(0, 11, 0, 1)
+							long.Position = UDim2.new(0, 7, 0, 4)
+							long.Rotation = -45
+							Instance.new("UICorner", long).CornerRadius = UDim.new(1, 0)
 							tick.Visible = selectedValues[opt] == true
-							refreshLabel()
-							pcall(dd.Callback, getSelectedArray())
-						end)
+							btn.MouseButton1Click:Connect(function()
+								selectedValues[opt] = not selectedValues[opt]
+								tick.Visible = selectedValues[opt] == true
+								refreshLabel()
+								pcall(dd.Callback, getSelectedArray())
+							end)
+						end
 					end
 				end
 				local function closeMulti()
@@ -2381,6 +2449,7 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 				end)
 				multiClose.MouseButton1Click:Connect(closeMulti)
 				multiBackdrop.MouseButton1Click:Connect(closeMulti)
+				multiSearch:GetPropertyChangedSignal("Text"):Connect(rebuildMultiList)
 				if isSmallScreen then
 					ApplyElementMobileLayout(row)
 				end
