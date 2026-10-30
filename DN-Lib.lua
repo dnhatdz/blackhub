@@ -710,7 +710,15 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 	tickLong.Rotation = -45
 	Instance.new("UICorner", tickLong).CornerRadius = UDim.new(1, 0)
 	Instance.new("UIScale", dropdownPanel)
-	local function closeDropdownPanel()
+	local activeDropdownSearchRefresh = nil
+
+dropdownSearch:GetPropertyChangedSignal("Text"):Connect(function()
+	if activeDropdownSearchRefresh then
+		activeDropdownSearchRefresh()
+	end
+end)
+
+local function closeDropdownPanel()
 		dropdownZone.Visible = false
 		Tween(dropdownZone, TweenPresets.fade, { GroupTransparency = 1 }):Play()
 		Tween(dropdownPanel:FindFirstChildOfClass("UIScale"), TweenPresets.pop, { Scale = 0.95 }):Play()
@@ -2094,13 +2102,13 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 							end
 						end
 					end
-					rebuildList()
 					windowRef._gui:FindFirstChild("DNHubUI", true)
-					dropdownSearch.Text = ""
-					dropdownSearch:GetPropertyChangedSignal("Text"):Connect(function()
+					activeDropdownSearchRefresh = function()
 						term = string.lower(dropdownSearch.Text or "")
 						rebuildList()
-					end)
+					end
+					dropdownSearch.Text = ""
+					activeDropdownSearchRefresh()
 				end)
 				refreshSingleLabel()
 				if isSmallScreen then
