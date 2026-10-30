@@ -131,6 +131,7 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 		AutoScale = true,
 		IslandDefaultSize = UDim2.new(0, 80, 0, 24),
 		IslandExpandedSize = UDim2.new(0, 300, 0, 84),
+		IslandIcon = "",
 		IslandEnabled = true,
 		ToggleDefaultSize = UDim2.new(0, 48, 0, 48),
 		ToggleSize = UDim2.new(0, 48, 0, 48),
@@ -171,6 +172,7 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 	local titleArea = Instance.new("Frame", windowFrame)
 	titleArea.Name = "Top"
 	titleArea.BackgroundTransparency = 1
+	titleArea.Active = true
 	titleArea.Size = UDim2.new(0, 179, 0, 85)
 	local dotRed = Instance.new("Frame", titleArea)
 	dotRed.BackgroundColor3 = Colors.red
@@ -460,7 +462,6 @@ return { CreateWindow = function(baseOptions, overrideOptions)
 			if minimized then restoreWindow() else minimizeWindow() end
 		end
 	end)
-	MakeDraggable(shadowImage, titleArea)
 	local horizontalDivider = Instance.new("Frame", windowFrame)
 	horizontalDivider.Name = "HDivider"
 	horizontalDivider.BackgroundColor3 = Color3.fromRGB(0, 235, 255)
@@ -829,6 +830,7 @@ local function closeDropdownPanel()
 	expandedThumb.Name = "Thumb"
 	expandedThumb.BackgroundColor3 = Color3.fromRGB(0, 235, 255)
 	expandedThumb.BorderSizePixel = 0
+	expandedThumb.ClipsDescendants = true
 	expandedThumb.Size = UDim2.new(0, 50, 0, 50)
 	expandedThumb.Position = UDim2.new(0, 16, 0, 16)
 	Instance.new("UICorner", expandedThumb).CornerRadius = UDim.new(0, 12)
@@ -841,13 +843,34 @@ local function closeDropdownPanel()
 	local expandedIcon = Instance.new("ImageLabel", expandedThumb)
 	expandedIcon.Name = "Img"
 	expandedIcon.ZIndex = 2
-	expandedIcon.ScaleType = Enum.ScaleType.Fit
-	expandedIcon.ImageTransparency = 0.05
-	expandedIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-	expandedIcon.Size = UDim2.new(0, 26, 0, 26)
-	expandedIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+	expandedIcon.ScaleType = Enum.ScaleType.Crop
+	expandedIcon.ImageTransparency = 0
+	expandedIcon.AnchorPoint = Vector2.new(0, 0)
+	expandedIcon.Size = UDim2.new(1, 0, 1, 0)
+	expandedIcon.Position = UDim2.new(0, 0, 0, 0)
 	expandedIcon.BackgroundTransparency = 1
 	expandedIcon.Visible = false
+	Instance.new("UICorner", expandedIcon).CornerRadius = UDim.new(0, 12)
+	
+	local function setIslandIcon(image)
+		if type(image) == "number" then
+			image = "rbxassetid://" .. tostring(image)
+		elseif type(image) ~= "string" then
+			return false
+		end
+		if image ~= "" and string.match(image, "^%d+$") then
+			image = "rbxassetid://" .. image
+		end
+		opts.IslandIcon = image
+		expandedIcon.Image = image
+		local hasImage = image ~= ""
+		expandedIcon.Visible = hasImage
+		expandedThumb.BackgroundTransparency = hasImage and 1 or 0
+		expandedThumbGradient.Transparency = NumberSequence.new(hasImage and 1 or 0)
+		return true
+	end
+	
+	setIslandIcon(opts.IslandIcon)
 	local expandedTimer = Instance.new("TextLabel", islandExpanded)
 	expandedTimer.Name = "Mono"
 	expandedTimer.Text = "00:00"
@@ -1356,6 +1379,9 @@ local function closeDropdownPanel()
 		ToggleUI = function()
 			if minimized then restoreWindow() else minimizeWindow() end
 		end,
+		SetIslandIcon = function(_, image)
+			return setIslandIcon(image)
+		end,
 		SetIslandEnabled = function(_, enabled)
 			opts.IslandEnabled = enabled
 			dynamicIsland.Visible = enabled
@@ -1413,7 +1439,7 @@ local function closeDropdownPanel()
 				if t.Status then
 					compactStatus.Visible = true
 					compactStatus.Text = t.Status
-					if t.Status == "ON" or t.Status == "Loaded!" then
+					if t.Status == "ON" then
 						compactStatus.TextColor3 = Colors.green
 					elseif t.Status == "OFF" then
 						compactStatus.TextColor3 = Colors.red
@@ -1449,7 +1475,7 @@ local function closeDropdownPanel()
 				compactStatus.Visible = true
 				compactStatus.Text = t.Status
 				compactStatus.TextTransparency = 1
-				if t.Status == "ON" then
+				if t.Status == "ON" or t.Status == "Loaded!" then
 					compactStatus.TextColor3 = Colors.green
 				elseif t.Status == "OFF" then
 					compactStatus.TextColor3 = Colors.red
@@ -1870,8 +1896,22 @@ local function closeDropdownPanel()
 				fill.Name = "Fill"
 				fill.BackgroundColor3 = Color3.fromRGB(0, 235, 255)
 				fill.BorderSizePixel = 0
-				fill.Size = UDim2.new((sl.Default - sl.Min) / (sl.Max - sl.Min), 0, 1, 0)
+				local initialRel = math.clamp((sl.Default - sl.Min) / (sl.Max - sl.Min), 0, 1)
+				fill.Size = UDim2.new(initialRel, 0, 1, 0)
 				Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+				local thumb = Instance.new("Frame", track)
+				thumb.Name = "Thumb"
+				thumb.BackgroundColor3 = Colors.fg
+				thumb.BorderSizePixel = 0
+				thumb.AnchorPoint = Vector2.new(0.5, 0.5)
+				thumb.Size = UDim2.new(0, 12, 0, 12)
+				thumb.Position = UDim2.new(initialRel, 0, 0.5, 0)
+				thumb.ZIndex = 3
+				Instance.new("UICorner", thumb).CornerRadius = UDim.new(1, 0)
+				local thumbStroke = Instance.new("UIStroke", thumb)
+				thumbStroke.Color = Colors.blue
+				thumbStroke.Thickness = 1.5
+				thumbStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 				local currentValue = sl.Default
 				local dragging = false
 				local function updateFromX(xPos)
@@ -1881,6 +1921,7 @@ local function closeDropdownPanel()
 						currentValue = val
 						valueText.Text = tostring(val) .. sl.Suffix
 						Tween(fill, TweenPresets.fast, { Size = UDim2.new(rel, 0, 1, 0) }):Play()
+						Tween(thumb, TweenPresets.fast, { Position = UDim2.new(rel, 0, 0.5, 0) }):Play()
 						pcall(sl.Callback, val)
 					end
 				end
@@ -1909,6 +1950,7 @@ local function closeDropdownPanel()
 						currentValue = clamped
 						valueText.Text = tostring(clamped) .. sl.Suffix
 						Tween(fill, TweenPresets.fast, { Size = UDim2.new(rel, 0, 1, 0) }):Play()
+						Tween(thumb, TweenPresets.fast, { Position = UDim2.new(rel, 0, 0.5, 0) }):Play()
 					end,
 				}
 			end
